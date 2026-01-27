@@ -1,0 +1,57 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 689c6eec3251be240a6b548b1b0ad0c8, type: 3}
+  m_Name: DefaultPlayerStats
+  m_EditorClassIdentifier: 
+  GroundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  SnapInput: 1
+  HorizontalDeadZone: 0.1
+  VerticalDeadZone: 0.1
+  MaxSpeed: 9.9
+  Acceleration: 105.6
+  GroundDeceleration: 60
+  AirAcceleration: 90
+  AirDeceleration: 30
+  JumpPower: 30
+  JumpBuffer: 0.15
+  CoyoteTime: 0.15
+  JumpCutMultiplier: 3
+  UseApexModifier: 1
+  ApexThreshold: 8
+  ApexGravityMultiplier: 0.5
+  ApexSpeedBonus: 0.1
+  ApexAccelerationBonus: 0.5
+  FallAcceleration: 93.4
+  MaxFallSpeed: 19.7
+  GroundingForce: -1.5
+  GrounderDistance: 0.05
+  UseEdgeDetection: 1
+  EdgeDetectionOffset: 0.5
+  EdgeCorrection: 0
+  EdgeCorrectionStrength: 50
+  AllowDash: 1
+  DashSpeed: 30
+  DashDuration: 0.15
+  DashEndSpeed: 10
+  AllowWallSlide: 1
+  WallLayer:
+    serializedVersion: 2
+    m_Bits: 128
+  WallCheckDistance: 0.1
+  WallSlideSpeed: 5
+  WallSlideAcceleration: 50
+  WallJumpHorizontalPower: 16
+  WallJumpVerticalPower: 22
+  WallJumpCoyoteTime: 0.1
+  ShowPresetButtons: 1
