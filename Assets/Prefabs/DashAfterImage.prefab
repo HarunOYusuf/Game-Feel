@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 3270565550453615665}
   - component: {fileID: 1135653600121736641}
   - component: {fileID: 1865362285011563892}
+  - component: {fileID: -4274620185391754396}
   m_Layer: 3
   m_Name: DashAfterImage
   m_TagString: Untagged
@@ -224,3 +225,22 @@ MonoBehaviour:
   _afterimageSpawnRate: 0.02
   _afterimageColor: {r: 0.5, g: 0.8, b: 1, a: 0.5}
   _afterimageFadeDuration: 0.3
+--- !u!114 &-4274620185391754396
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2850172336614300391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 74f7fcb1a9f76e549b41b906f91b775e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _interpolatePosition: 1
+  _playbackSpeed: 1
+  _speedParam: Speed
+  _groundedParam: IsGrounded
+  _jumpTrigger: Jump
+  _flipSprite: 1
+  _ghostAlpha: 0.5
