@@ -34,6 +34,11 @@ namespace UltimateController
         private static readonly Color BlueZoneColour = new Color(0.3f, 0.3f, 1f, 0.35f);   // No Record
         private static readonly Color PurpleZoneColour = new Color(0.7f, 0.2f, 0.9f, 0.35f); // Both
 
+        /// <summary>
+        /// Returns true if this zone destroys clones (Blue or Purple zones)
+        /// </summary>
+        public bool DestroysClones => _zoneType == ZoneType.NoRecord || _zoneType == ZoneType.NoDashAndNoRecord;
+
         private void Start()
         {
             // Ensure collider is a trigger

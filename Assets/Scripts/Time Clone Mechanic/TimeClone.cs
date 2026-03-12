@@ -38,6 +38,7 @@ namespace UltimateController
         private Rigidbody2D _rb;
         private SpriteRenderer _sr;
         private Animator _animator;
+        private Collider2D _collider;
 
         // Playback state
         private List<TimeSnapshot> _snapshots;
@@ -58,6 +59,7 @@ namespace UltimateController
         private void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
+            _collider = GetComponent<Collider2D>();
             
             // Find sprite renderer (check children too)
             _sr = GetComponent<SpriteRenderer>();
@@ -75,6 +77,12 @@ namespace UltimateController
 
             _rb.bodyType = RigidbodyType2D.Kinematic;
             _rb.interpolation = RigidbodyInterpolation2D.None;
+
+            // Make sure collider is a trigger so we can detect zones
+            if (_collider != null)
+            {
+                _collider.isTrigger = true;
+            }
 
             if (_sr != null)
             {
@@ -218,6 +226,39 @@ namespace UltimateController
                 OnPlaybackComplete?.Invoke();
             }
         }
+
+        #region Colour Zone Detection
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            // Check if we entered a ColourZone
+            var colourZone = other.GetComponent<ColourZone>();
+            if (colourZone != null)
+            {
+                // Destroy clone if zone blocks clones (Blue or Purple)
+                if (colourZone.DestroysClones)
+                {
+                    DestroyClone();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Immediately destroy this clone with despawn effect
+        /// </summary>
+        public void DestroyClone()
+        {
+            if (!_isPlaying) return;
+            
+            _isPlaying = false;
+            PlayDespawnEffect();
+            OnPlaybackComplete?.Invoke();
+            
+            // Destroy after a tiny delay to let particles detach
+            Destroy(gameObject, 0.05f);
+        }
+
+        #endregion
 
         #region Particle Effects
 
