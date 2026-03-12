@@ -76,6 +76,26 @@ namespace UltimateController
 
         #endregion
 
+        #region Ability State (Color Zones)
+
+        // Tracks which abilities are currently allowed (modified by ColorZones)
+        private bool _dashEnabled = true;
+        
+        /// <summary>
+        /// Whether dash is currently allowed (can be disabled by color zones)
+        /// </summary>
+        public bool DashEnabled => _dashEnabled;
+
+        /// <summary>
+        /// Called by ColorZone to enable/disable dash
+        /// </summary>
+        public void SetDashEnabled(bool enabled)
+        {
+            _dashEnabled = enabled;
+        }
+
+        #endregion
+
         #region Wall Slide State
 
         private bool _isWallSliding;
@@ -109,6 +129,7 @@ namespace UltimateController
         {
             _frameInput = new FrameInput
             {
+                // Jump: Space / X button (JoystickButton0)
                 JumpDown = UnityEngine.Input.GetButtonDown("Jump") || 
                            UnityEngine.Input.GetKeyDown(KeyCode.Space) ||
                            UnityEngine.Input.GetKeyDown(KeyCode.JoystickButton0),
@@ -117,6 +138,7 @@ namespace UltimateController
                            UnityEngine.Input.GetKey(KeyCode.Space) ||
                            UnityEngine.Input.GetKey(KeyCode.JoystickButton0),
                            
+                // Dash: Left Shift / K / Circle button (JoystickButton1)
                 DashDown = UnityEngine.Input.GetKeyDown(KeyCode.LeftShift) || 
                            UnityEngine.Input.GetKeyDown(KeyCode.K) ||
                            UnityEngine.Input.GetKeyDown(KeyCode.JoystickButton1),
@@ -491,7 +513,7 @@ namespace UltimateController
 
         private void HandleDash()
         {
-            if (_dashToConsume && _canDash && _stats.AllowDash)
+            if (_dashToConsume && _canDash && _stats.AllowDash && _dashEnabled)
             {
                 if (_isWallSliding)
                 {

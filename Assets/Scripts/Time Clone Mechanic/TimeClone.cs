@@ -27,6 +27,13 @@ namespace UltimateController
         [SerializeField] private bool _flipSprite = true;
         [SerializeField] private float _ghostAlpha = 0.5f;
 
+        [Header("Particles")]
+        [Tooltip("Particle system to play when clone spawns (assign in prefab)")]
+        [SerializeField] private ParticleSystem _spawnParticles;
+        
+        [Tooltip("Particle system to play when clone despawns (assign in prefab)")]
+        [SerializeField] private ParticleSystem _despawnParticles;
+
         // Components
         private Rigidbody2D _rb;
         private SpriteRenderer _sr;
@@ -67,7 +74,7 @@ namespace UltimateController
             }
 
             _rb.bodyType = RigidbodyType2D.Kinematic;
-            _rb.interpolation = RigidbodyInterpolation2D.None; // Prevents jitter/bouncing
+            _rb.interpolation = RigidbodyInterpolation2D.None;
 
             if (_sr != null)
             {
@@ -96,6 +103,9 @@ namespace UltimateController
             _lastPosition = first.Position;
             _wasGrounded = first.IsGrounded;
             FacingDirection = first.FacingDirection;
+
+            // Play spawn particles
+            PlaySpawnEffect();
 
             OnPlaybackStarted?.Invoke();
         }
@@ -148,14 +158,11 @@ namespace UltimateController
             _rb.position = targetPos;
 
             // Update facing direction
-            // When wall sliding, face away from wall (like player does)
-            // Otherwise use recorded facing direction
             FacingDirection = current.FacingDirection;
             int visualDirection = FacingDirection;
             
             if (current.IsWallSliding)
             {
-                // Face away from the wall when sliding
                 visualDirection = -current.WallDirection;
             }
             
@@ -177,7 +184,6 @@ namespace UltimateController
                 _animator.SetBool(_wallSlidingParam, current.IsWallSliding);
                 _animator.SetBool(_dashingParam, current.IsDashing);
 
-                // Trigger jump when leaving ground with upward velocity
                 if (_wasGrounded && !current.IsGrounded && current.Velocity.y > 0)
                 {
                     _animator.SetTrigger(_jumpTrigger);
@@ -197,6 +203,9 @@ namespace UltimateController
                 _rb.position = _snapshots[_snapshots.Count - 1].Position;
             }
 
+            // Play despawn particles
+            PlayDespawnEffect();
+
             OnPlaybackComplete?.Invoke();
         }
 
@@ -205,8 +214,42 @@ namespace UltimateController
             if (_isPlaying)
             {
                 _isPlaying = false;
+                PlayDespawnEffect();
                 OnPlaybackComplete?.Invoke();
             }
         }
+
+        #region Particle Effects
+
+        /// <summary>
+        /// Play the spawn particle effect
+        /// </summary>
+        private void PlaySpawnEffect()
+        {
+            if (_spawnParticles != null)
+            {
+                _spawnParticles.Play();
+            }
+        }
+
+        /// <summary>
+        /// Play the despawn particle effect.
+        /// Detaches particles so they finish playing after clone is destroyed.
+        /// </summary>
+        private void PlayDespawnEffect()
+        {
+            if (_despawnParticles != null)
+            {
+                // Detach from parent so particles survive after clone is destroyed
+                _despawnParticles.transform.SetParent(null);
+                _despawnParticles.Play();
+                
+                // Destroy particle system after it finishes
+                float lifetime = _despawnParticles.main.duration + _despawnParticles.main.startLifetime.constantMax;
+                Destroy(_despawnParticles.gameObject, lifetime);
+            }
+        }
+
+        #endregion
     }
 }

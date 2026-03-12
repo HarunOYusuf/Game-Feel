@@ -48,7 +48,7 @@ namespace UltimateController
 
         [Header("Input")]
         [SerializeField] private KeyCode _spawnKey = KeyCode.R;
-        [SerializeField] private KeyCode _spawnJoystickButton = KeyCode.JoystickButton2;
+        [SerializeField] private KeyCode _spawnJoystickButton = KeyCode.JoystickButton2; // Square on PlayStation
         [SerializeField] private float _spawnCooldown = 0.5f;
 
         // Dependencies
@@ -65,15 +65,32 @@ namespace UltimateController
         private List<TimeClone> _activeClones = new List<TimeClone>();
         private float _lastSpawnTime = float.MinValue;
 
+        // Color Zone state
+        private bool _recordingEnabled = true;
+
         // Events
         public event Action<TimeClone> OnCloneSpawned;
         public event Action<TimeClone> OnCloneDestroyed;
 
         // Public accessors
         public int ActiveCloneCount => _activeClones.Count;
-        public bool CanSpawnClone => Time.time >= _lastSpawnTime + _spawnCooldown && 
+        public bool CanSpawnClone => _recordingEnabled &&
+                                     Time.time >= _lastSpawnTime + _spawnCooldown && 
                                      _activeClones.Count < _maxClones;
         public float CloneDuration { get => _cloneDuration; set => _cloneDuration = Mathf.Max(0.1f, value); }
+        
+        /// <summary>
+        /// Whether recording/spawning is currently allowed (can be disabled by color zones)
+        /// </summary>
+        public bool RecordingEnabled => _recordingEnabled;
+
+        /// <summary>
+        /// Called by ColorZone to enable/disable clone recording
+        /// </summary>
+        public void SetRecordingEnabled(bool enabled)
+        {
+            _recordingEnabled = enabled;
+        }
 
         private void Awake()
         {
@@ -116,12 +133,11 @@ namespace UltimateController
 
         private void RecordSnapshot()
         {
-            // Check if player is dashing (via velocity or interface if available)
+            // Check if player is dashing
             bool isDashing = false;
             var playerController = GetComponent<UltimatePlayerController>();
             if (playerController != null)
             {
-                // Access dash state through reflection or public property
                 var dashField = typeof(UltimatePlayerController).GetField("_isDashing", 
                     System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
                 if (dashField != null)
@@ -221,11 +237,9 @@ namespace UltimateController
             var rb = obj.AddComponent<Rigidbody2D>();
             rb.bodyType = RigidbodyType2D.Kinematic;
 
-            // Add collider but disable it - clone is visual only
-            // Enable if you need clone to interact with pressure plates etc.
             var col = obj.AddComponent<CapsuleCollider2D>();
             col.isTrigger = true;
-            col.enabled = false; // Prevents interfering with player collision
+            col.enabled = false;
 
             var playerCol = GetComponent<CapsuleCollider2D>();
             if (playerCol != null)
@@ -235,21 +249,18 @@ namespace UltimateController
                 col.direction = playerCol.direction;
             }
 
-            // Find sprite renderer (check children too)
             var playerSr = GetComponent<SpriteRenderer>();
             if (playerSr == null)
             {
                 playerSr = GetComponentInChildren<SpriteRenderer>();
             }
 
-            // Find animator (check children too)
             var playerAnimator = GetComponent<Animator>();
             if (playerAnimator == null)
             {
                 playerAnimator = GetComponentInChildren<Animator>();
             }
 
-            // Create sprite child object (matching player structure)
             var spriteObj = new GameObject("Sprite");
             spriteObj.transform.SetParent(obj.transform);
             spriteObj.transform.localPosition = Vector3.zero;
@@ -268,7 +279,6 @@ namespace UltimateController
                 sr.sortingOrder = -1;
             }
 
-            // Copy animator controller if exists
             if (playerAnimator != null && playerAnimator.runtimeAnimatorController != null)
             {
                 var cloneAnimator = spriteObj.AddComponent<Animator>();
