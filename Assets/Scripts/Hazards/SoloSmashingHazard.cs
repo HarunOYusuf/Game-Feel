@@ -54,8 +54,8 @@ namespace UltimateController
         public float collisionOffset = 0.5f;
 
         [Header("Platform (Optional)")]
-        [Tooltip("If player can stand on this spike, assign a solid collider for platform detection")]
-        [SerializeField] private Collider2D _platformCollider;
+        [Tooltip("Enable if player can stand on this spike while it moves")]
+        [SerializeField] private bool _actAsPlatform = true;
 
         // State
         private enum State { Waiting, Shaking, Shooting, Stunned, Returning }
@@ -90,7 +90,7 @@ namespace UltimateController
             }
 
             // Setup platform collision detection
-            if (_platformCollider != null)
+            if (_actAsPlatform)
             {
                 // Add collision listener component to the spike
                 var listener = _spike.gameObject.GetComponent<PlatformCollisionListener>();
@@ -319,6 +319,7 @@ namespace UltimateController
     public class PlatformCollisionListener : MonoBehaviour
     {
         private SoloSmashingHazard _hazard;
+        private Transform _currentPassenger;
 
         public void Initialize(SoloSmashingHazard hazard)
         {
@@ -328,10 +329,27 @@ namespace UltimateController
         private void OnCollisionEnter2D(Collision2D collision)
         {
             if (_hazard == null) return;
+            
+            // Only detect player
+            if (collision.collider.GetComponent<UltimatePlayerController>() == null) return;
 
             // Check if passenger is on top
             if (IsOnTop(collision))
             {
+                _currentPassenger = collision.transform;
+                _hazard.OnPassengerEnter(collision.transform);
+            }
+        }
+
+        private void OnCollisionStay2D(Collision2D collision)
+        {
+            if (_hazard == null) return;
+            if (collision.collider.GetComponent<UltimatePlayerController>() == null) return;
+            
+            // Keep checking if player is on top (in case they land while platform is moving)
+            if (_currentPassenger == null && IsOnTop(collision))
+            {
+                _currentPassenger = collision.transform;
                 _hazard.OnPassengerEnter(collision.transform);
             }
         }
@@ -339,8 +357,15 @@ namespace UltimateController
         private void OnCollisionExit2D(Collision2D collision)
         {
             if (_hazard == null) return;
+            
+            // Only detect player
+            if (collision.collider.GetComponent<UltimatePlayerController>() == null) return;
 
-            _hazard.OnPassengerExit(collision.transform);
+            if (_currentPassenger == collision.transform)
+            {
+                _currentPassenger = null;
+                _hazard.OnPassengerExit(collision.transform);
+            }
         }
 
         private bool IsOnTop(Collision2D collision)

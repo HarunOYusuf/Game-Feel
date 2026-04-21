@@ -9,15 +9,12 @@ namespace UltimateController
     /// Setup:
     /// 1. Add to your spike/hazard GameObject
     /// 2. Ensure it has a Collider2D set to "Is Trigger"
-    /// 3. Set the spawn point (or it uses player's starting position)
+    /// 3. GameManager handles respawn position automatically
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class Hazard : MonoBehaviour
     {
         [Header("Respawn Settings")]
-        [Tooltip("Where to respawn the player. If empty, uses player's starting position.")]
-        [SerializeField] private Transform _respawnPoint;
-        
         [Tooltip("Delay before respawning (for death animation/effect)")]
         [SerializeField] private float _respawnDelay = 0.5f;
 
@@ -28,9 +25,9 @@ namespace UltimateController
         [Header("Debug")]
         [SerializeField] private bool _showDebugMessages = false;
 
-        // Cached player start position
-        private static Vector2 _currentCheckpoint;
-        private static bool _checkpointSet = false;
+        // Fallback checkpoint (used if no GameManager)
+        private static Vector2 _fallbackCheckpoint;
+        private static bool _fallbackCheckpointSet = false;
 
         private void Start()
         {
@@ -61,8 +58,10 @@ namespace UltimateController
             // Play effects
             if (_deathParticles != null)
             {
-                _deathParticles.transform.position = player.transform.position;
-                _deathParticles.Play();
+                // Spawn particles at player position
+                var particles = Instantiate(_deathParticles, player.transform.position, Quaternion.identity);
+                particles.Play();
+                Destroy(particles.gameObject, particles.main.duration + particles.main.startLifetime.constantMax);
             }
 
             if (_deathSound != null)
@@ -70,76 +69,62 @@ namespace UltimateController
                 _deathSound.Play();
             }
 
-            // Get respawn position
-            Vector2 respawnPos = GetRespawnPosition(player);
-
-            // Respawn player (with optional delay)
+            // Respawn via GameManager or fallback
             if (_respawnDelay > 0)
             {
-                // Hide player briefly
                 player.gameObject.SetActive(false);
-                StartCoroutine(RespawnAfterDelay(player, respawnPos));
+                StartCoroutine(RespawnAfterDelay(player));
             }
             else
             {
-                RespawnPlayer(player, respawnPos);
+                RespawnPlayer(player);
             }
         }
 
-        private Vector2 GetRespawnPosition(UltimatePlayerController player)
-        {
-            // Priority: Respawn point > Checkpoint > Player start position
-            if (_respawnPoint != null)
-            {
-                return _respawnPoint.position;
-            }
-            
-            if (_checkpointSet)
-            {
-                return _currentCheckpoint;
-            }
-
-            // First time - store player's starting position as default checkpoint
-            if (!_checkpointSet)
-            {
-                _currentCheckpoint = player.transform.position;
-                _checkpointSet = true;
-            }
-
-            return _currentCheckpoint;
-        }
-
-        private System.Collections.IEnumerator RespawnAfterDelay(UltimatePlayerController player, Vector2 position)
+        private System.Collections.IEnumerator RespawnAfterDelay(UltimatePlayerController player)
         {
             yield return new WaitForSeconds(_respawnDelay);
             
             player.gameObject.SetActive(true);
-            RespawnPlayer(player, position);
+            RespawnPlayer(player);
         }
 
-        private void RespawnPlayer(UltimatePlayerController player, Vector2 position)
+        private void RespawnPlayer(UltimatePlayerController player)
         {
-            player.Teleport(position);
-            
+            // Use GameManager if available
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.OnPlayerDeath();
+            }
+            else
+            {
+                // Fallback: use static checkpoint
+                Vector2 respawnPos = _fallbackCheckpointSet 
+                    ? _fallbackCheckpoint 
+                    : (Vector2)player.transform.position;
+                    
+                player.Teleport(respawnPos);
+            }
+
             if (_showDebugMessages)
-                Debug.Log($"Player respawned at {position}");
+                Debug.Log("Player respawned");
         }
 
         /// <summary>
-        /// Call this to set a new checkpoint (from a Checkpoint script)
+        /// Set fallback checkpoint (used when no GameManager exists)
         /// </summary>
         public static void SetCheckpoint(Vector2 position)
         {
-            _currentCheckpoint = position;
-            _checkpointSet = true;
+            _fallbackCheckpoint = position;
+            _fallbackCheckpointSet = true;
         }
 
         /// <summary>
-        /// Reset checkpoint (useful for restarting level)
+        /// Reset fallback checkpoint
         /// </summary>
         public static void ResetCheckpoint()
         {
-            _checkpointSet = false;
+            _fallbackCheckpointSet = false;
         }
 
         // Visualise in editor
