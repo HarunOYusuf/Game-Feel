@@ -59,7 +59,7 @@ namespace UltimateController
 
         // State
         private enum State { Waiting, Shaking, Shooting, Stunned, Returning }
-        private State _currentState = State.Waiting;
+        [SerializeField] private State _currentState = State.Waiting;
         
         // Positions
         private Vector3 _spikeStart;
