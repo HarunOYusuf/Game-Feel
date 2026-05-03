@@ -89,8 +89,7 @@ namespace UltimateController
             }
             else
             {
-                // Fallback to static Hazard checkpoint if no GameManager
-                Hazard.SetCheckpoint(respawnPos);
+                Debug.LogWarning("Checkpoint: No GameManager found!");
             }
 
             // Visual feedback

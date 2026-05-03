@@ -14,20 +14,12 @@ namespace UltimateController
     [RequireComponent(typeof(Collider2D))]
     public class Hazard : MonoBehaviour
     {
-        [Header("Respawn Settings")]
-        [Tooltip("Delay before respawning (for death animation/effect)")]
-        [SerializeField] private float _respawnDelay = 0.5f;
-
         [Header("Effects (Optional)")]
         [SerializeField] private ParticleSystem _deathParticles;
         [SerializeField] private AudioSource _deathSound;
 
         [Header("Debug")]
         [SerializeField] private bool _showDebugMessages = false;
-
-        // Fallback checkpoint (used if no GameManager)
-        private static Vector2 _fallbackCheckpoint;
-        private static bool _fallbackCheckpointSet = false;
 
         private void Start()
         {
@@ -42,12 +34,12 @@ namespace UltimateController
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            // Check if player entered
-            var controller = other.GetComponent<UltimatePlayerController>();
-            if (controller != null)
-            {
-                KillPlayer(controller);
-            }
+            // Must have controller DIRECTLY on this collider's GameObject (not parent)
+            // This prevents DashSprite's collider from triggering death
+            if (!other.TryGetComponent<UltimatePlayerController>(out var controller))
+                return;
+
+            KillPlayer(controller);
         }
 
         private void KillPlayer(UltimatePlayerController player)
@@ -58,7 +50,6 @@ namespace UltimateController
             // Play effects
             if (_deathParticles != null)
             {
-                // Spawn particles at player position
                 var particles = Instantiate(_deathParticles, player.transform.position, Quaternion.identity);
                 particles.Play();
                 Destroy(particles.gameObject, particles.main.duration + particles.main.startLifetime.constantMax);
@@ -69,62 +60,19 @@ namespace UltimateController
                 _deathSound.Play();
             }
 
-            // Respawn via GameManager or fallback
-            if (_respawnDelay > 0)
-            {
-                player.gameObject.SetActive(false);
-                StartCoroutine(RespawnAfterDelay(player));
-            }
-            else
-            {
-                RespawnPlayer(player);
-            }
-        }
-
-        private System.Collections.IEnumerator RespawnAfterDelay(UltimatePlayerController player)
-        {
-            yield return new WaitForSeconds(_respawnDelay);
-            
-            player.gameObject.SetActive(true);
-            RespawnPlayer(player);
-        }
-
-        private void RespawnPlayer(UltimatePlayerController player)
-        {
-            // Use GameManager if available
+            // Respawn via GameManager
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.OnPlayerDeath();
             }
             else
             {
-                // Fallback: use static checkpoint
-                Vector2 respawnPos = _fallbackCheckpointSet 
-                    ? _fallbackCheckpoint 
-                    : (Vector2)player.transform.position;
-                    
-                player.Teleport(respawnPos);
+                // Fallback: just teleport to origin
+                player.Teleport(Vector2.zero);
             }
 
             if (_showDebugMessages)
                 Debug.Log("Player respawned");
-        }
-
-        /// <summary>
-        /// Set fallback checkpoint (used when no GameManager exists)
-        /// </summary>
-        public static void SetCheckpoint(Vector2 position)
-        {
-            _fallbackCheckpoint = position;
-            _fallbackCheckpointSet = true;
-        }
-
-        /// <summary>
-        /// Reset fallback checkpoint
-        /// </summary>
-        public static void ResetCheckpoint()
-        {
-            _fallbackCheckpointSet = false;
         }
 
         // Visualise in editor

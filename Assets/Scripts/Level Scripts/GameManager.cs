@@ -182,6 +182,7 @@ namespace UltimateController
                 _cloneRecorder.DestroyAllClones();
             }
 
+            // Respawn player
             SpawnPlayer();
         }
 

@@ -4,13 +4,15 @@ namespace UltimateController
 {
     /// <summary>
     /// A door that opens when the player has the matching key.
-    /// Stays solid until opened.
+    /// Stays solid until opened, then plays animation and disables collider.
     /// 
     /// Setup:
-    /// 1. Create a sprite for the door
+    /// 1. Create a sprite for the door with Animator
     /// 2. Add BoxCollider2D (NOT a trigger - it's solid)
     /// 3. Add this script
     /// 4. Set the Required Key ID to match your Key's ID
+    /// 5. Assign the Animator (or it will auto-find on children)
+    /// 6. Make sure your Animator has a trigger parameter called "Open"
     /// </summary>
     [RequireComponent(typeof(Collider2D))]
     public class Door : MonoBehaviour
@@ -21,6 +23,17 @@ namespace UltimateController
         
         [Tooltip("Does the key get consumed when opening the door?")]
         [SerializeField] private bool _consumeKey = true;
+
+        [Header("Animation")]
+        [Tooltip("Animator with opening animation (auto-finds in children if not set)")]
+        [SerializeField] private Animator _animator;
+        
+        [Tooltip("Trigger parameter name in the Animator")]
+        [SerializeField] private string _openTriggerName = "Open";
+        
+        [Tooltip("Destroy door after animation? (set to animation length)")]
+        [SerializeField] private bool _destroyAfterAnimation = false;
+        [SerializeField] private float _destroyDelay = 1f;
 
         [Header("Effects (Optional)")]
         [SerializeField] private ParticleSystem _openParticles;
@@ -52,6 +65,12 @@ namespace UltimateController
             if (_collider.isTrigger)
             {
                 _collider.isTrigger = false;
+            }
+
+            // Auto-find animator if not assigned
+            if (_animator == null)
+            {
+                _animator = GetComponentInChildren<Animator>();
             }
         }
 
@@ -101,21 +120,31 @@ namespace UltimateController
                 inventory.RemoveKey(_requiredKeyID);
             }
 
+            // Disable collider so player can walk through
+            _collider.enabled = false;
+
+            // Play opening animation
+            if (_animator != null)
+            {
+                _animator.SetTrigger(_openTriggerName);
+            }
+
             // Effects
             if (_openParticles != null)
             {
-                var particles = Instantiate(_openParticles, transform.position, Quaternion.identity);
-                particles.Play();
-                Destroy(particles.gameObject, particles.main.duration + particles.main.startLifetime.constantMax);
+                _openParticles.Play();
             }
 
             if (_openSound != null)
             {
-                AudioSource.PlayClipAtPoint(_openSound.clip, transform.position);
+                _openSound.Play();
             }
 
-            // Destroy the door (for now)
-            Destroy(gameObject);
+            // Optionally destroy after animation
+            if (_destroyAfterAnimation)
+            {
+                Destroy(gameObject, _destroyDelay);
+            }
         }
 
         // Visualise in editor

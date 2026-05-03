@@ -80,6 +80,7 @@ namespace UltimateController
 
         // Tracks which abilities are currently allowed (modified by ColorZones)
         private bool _dashEnabled = true;
+        private bool _movementEnabled = true;
         
         /// <summary>
         /// Whether dash is currently allowed (can be disabled by color zones)
@@ -87,11 +88,32 @@ namespace UltimateController
         public bool DashEnabled => _dashEnabled;
 
         /// <summary>
+        /// Whether movement is currently allowed (disabled during respawn)
+        /// </summary>
+        public bool MovementEnabled => _movementEnabled;
+
+        /// <summary>
         /// Called by ColorZone to enable/disable dash
         /// </summary>
         public void SetDashEnabled(bool enabled)
         {
             _dashEnabled = enabled;
+        }
+
+        /// <summary>
+        /// Enable or disable all player movement (for respawn, cutscenes, etc.)
+        /// </summary>
+        public void SetMovementEnabled(bool enabled)
+        {
+            _movementEnabled = enabled;
+            
+            if (!enabled)
+            {
+                // Stop all movement immediately
+                _frameVelocity = Vector2.zero;
+                _frameInput = new FrameInput();
+                _rb.linearVelocity = Vector2.zero;
+            }
         }
 
         #endregion
@@ -127,6 +149,13 @@ namespace UltimateController
 
         private void GatherInput()
         {
+            // Don't gather input if movement is disabled
+            if (!_movementEnabled)
+            {
+                _frameInput = new FrameInput();
+                return;
+            }
+
             _frameInput = new FrameInput
             {
                 // Jump: Space / X button (JoystickButton0)
