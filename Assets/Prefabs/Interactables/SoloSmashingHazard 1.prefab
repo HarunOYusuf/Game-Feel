@@ -48,13 +48,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _spikeA: {fileID: 2897989170738902744}
   _spikeB: {fileID: 4855368796154451144}
-  cycleTime: 3
+  cycleTime: 0.5
   cycleOffset: 0
-  shakeTime: 0.4
+  shakeTime: 0.3
   stunTime: 0.3
-  smashSpeed: 15
-  returnSpeed: 3
-  shakeIntensity: 0.1
+  smashSpeed: 20
+  returnSpeed: 10
+  shakeIntensity: 0.2
   shakeFrequency: 50
   _collisionPoint: {fileID: 0}
   collisionOffset: 1
