@@ -236,10 +236,11 @@ namespace UltimateController
 
             var rb = obj.AddComponent<Rigidbody2D>();
             rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.simulated = true;
 
             var col = obj.AddComponent<CapsuleCollider2D>();
-            col.isTrigger = true;
-            col.enabled = false;
+            col.isTrigger = false;  // NOT a trigger - needs to collide with platforms
+            col.enabled = true;      // ENABLED - needs to work
 
             var playerCol = GetComponent<CapsuleCollider2D>();
             if (playerCol != null)

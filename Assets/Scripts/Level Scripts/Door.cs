@@ -87,8 +87,19 @@ namespace UltimateController
 
         private void TryOpen(GameObject playerObject)
         {
-            // Check if player has the key
+            // Get the player's inventory
+            // First try the colliding object, then search for the player
             var inventory = playerObject.GetComponent<PlayerInventory>();
+            
+            if (inventory == null)
+            {
+                // Inventory might be on a different player object - find it
+                var player = FindFirstObjectByType<UltimatePlayerController>();
+                if (player != null)
+                {
+                    inventory = player.GetComponent<PlayerInventory>();
+                }
+            }
             
             if (inventory != null && inventory.HasKey(_requiredKeyID))
             {
@@ -98,7 +109,12 @@ namespace UltimateController
             {
                 // Player doesn't have the key
                 if (_showDebugMessages)
-                    Debug.Log($"Door locked! Requires key: {_requiredKeyID}");
+                {
+                    if (inventory == null)
+                        Debug.Log($"Door locked! No inventory found.");
+                    else
+                        Debug.Log($"Door locked! Requires key: {_requiredKeyID}. Player has: {string.Join(", ", inventory.GetAllKeys())}");
+                }
 
                 if (_lockedSound != null)
                 {

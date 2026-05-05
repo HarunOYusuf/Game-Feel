@@ -12,6 +12,7 @@ namespace UltimateController
     /// 2. Add this script
     /// 3. Assign the player and spawn point
     /// 4. Configure which abilities are available in this level
+    /// 5. Optionally assign unlock trigger zones
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -29,12 +30,19 @@ namespace UltimateController
         [Tooltip("Scene to load when level is complete")]
         [SerializeField] private string _nextLevelScene;
 
-        [Header("Ability Unlocks")]
-        [Tooltip("Can the player dash in this level?")]
-        [SerializeField] private bool _dashEnabled = true;
+        [Header("Initial Ability Settings")]
+        [Tooltip("Can the player dash at level start?")]
+        [SerializeField] private bool _dashEnabledAtStart = true;
         
-        [Tooltip("Can the player use time clone in this level?")]
-        [SerializeField] private bool _timeCloneEnabled = false;
+        [Tooltip("Can the player use time clone at level start?")]
+        [SerializeField] private bool _timeCloneEnabledAtStart = false;
+
+        [Header("Ability Unlock Triggers (Optional)")]
+        [Tooltip("When player enters this trigger, dash is unlocked")]
+        [SerializeField] private Collider2D _dashUnlockTrigger;
+        
+        [Tooltip("When player enters this trigger, time clone is unlocked")]
+        [SerializeField] private Collider2D _timeCloneUnlockTrigger;
 
         [Header("Debug")]
         [SerializeField] private bool _showDebugMessages = true;
@@ -49,6 +57,10 @@ namespace UltimateController
         // Player components
         private UltimatePlayerController _playerController;
         private TimeCloneRecorder _cloneRecorder;
+
+        // Current ability states (can be unlocked during gameplay)
+        private bool _dashEnabled;
+        private bool _timeCloneEnabled;
 
         // Stats
         private int _deathCount;
@@ -81,7 +93,17 @@ namespace UltimateController
             {
                 _playerController = _player.GetComponent<UltimatePlayerController>();
                 _cloneRecorder = _player.GetComponent<TimeCloneRecorder>();
+                
+                // Ensure player has an inventory
+                if (_player.GetComponent<PlayerInventory>() == null)
+                {
+                    _player.AddComponent<PlayerInventory>();
+                }
             }
+
+            // Set initial ability states
+            _dashEnabled = _dashEnabledAtStart;
+            _timeCloneEnabled = _timeCloneEnabledAtStart;
         }
 
         private void Start()
@@ -105,7 +127,10 @@ namespace UltimateController
                 Debug.LogWarning("GameManager: No spawn point assigned! Using player's starting position.");
             }
 
-            // Apply ability restrictions FIRST (before spawning)
+            // Setup unlock triggers
+            SetupUnlockTriggers();
+
+            // Apply ability settings
             ApplyAbilitySettings();
 
             // Spawn player at start
@@ -115,8 +140,55 @@ namespace UltimateController
                 Debug.Log($"GameManager: {_levelName} started. Dash: {_dashEnabled}, Clone: {_timeCloneEnabled}");
         }
 
+        private void SetupUnlockTriggers()
+        {
+            // Setup dash unlock trigger
+            if (_dashUnlockTrigger != null)
+            {
+                _dashUnlockTrigger.isTrigger = true;
+                var dashTrigger = _dashUnlockTrigger.gameObject.AddComponent<AbilityUnlockTrigger>();
+                dashTrigger.Initialize(this, AbilityUnlockTrigger.AbilityType.Dash);
+            }
+
+            // Setup time clone unlock trigger
+            if (_timeCloneUnlockTrigger != null)
+            {
+                _timeCloneUnlockTrigger.isTrigger = true;
+                var cloneTrigger = _timeCloneUnlockTrigger.gameObject.AddComponent<AbilityUnlockTrigger>();
+                cloneTrigger.Initialize(this, AbilityUnlockTrigger.AbilityType.TimeClone);
+            }
+        }
+
         /// <summary>
-        /// Apply ability unlock settings to player
+        /// Unlock dash ability (persists through death)
+        /// </summary>
+        public void UnlockDash()
+        {
+            if (_dashEnabled) return;
+            
+            _dashEnabled = true;
+            ApplyAbilitySettings();
+
+            if (_showDebugMessages)
+                Debug.Log("GameManager: DASH UNLOCKED!");
+        }
+
+        /// <summary>
+        /// Unlock time clone ability (persists through death)
+        /// </summary>
+        public void UnlockTimeClone()
+        {
+            if (_timeCloneEnabled) return;
+            
+            _timeCloneEnabled = true;
+            ApplyAbilitySettings();
+
+            if (_showDebugMessages)
+                Debug.Log("GameManager: TIME CLONE UNLOCKED!");
+        }
+
+        /// <summary>
+        /// Apply current ability settings to player
         /// </summary>
         private void ApplyAbilitySettings()
         {
@@ -127,12 +199,8 @@ namespace UltimateController
 
             if (_cloneRecorder != null)
             {
-                // Disable the component entirely if time clone not allowed
                 _cloneRecorder.enabled = _timeCloneEnabled;
                 _cloneRecorder.SetRecordingEnabled(_timeCloneEnabled);
-                
-                if (_showDebugMessages && !_timeCloneEnabled)
-                    Debug.Log("GameManager: Time Clone ability DISABLED for this level");
             }
         }
 
@@ -159,11 +227,11 @@ namespace UltimateController
             // Ensure player is active
             _player.SetActive(true);
 
-            // Re-apply ability settings (in case they were modified by colour zones)
+            // Re-apply ability settings (uses current unlocked state, not initial)
             ApplyAbilitySettings();
 
             if (_showDebugMessages)
-                Debug.Log($"GameManager: Player spawned at {spawnPos}");
+                Debug.Log($"GameManager: Player spawned at {spawnPos}. Dash: {_dashEnabled}, Clone: {_timeCloneEnabled}");
         }
 
         /// <summary>
@@ -248,6 +316,58 @@ namespace UltimateController
             {
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawWireSphere(_currentCheckpoint, 0.4f);
+            }
+
+            // Draw unlock triggers
+            Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f); // Orange
+            if (_dashUnlockTrigger != null)
+            {
+                Gizmos.DrawWireCube(_dashUnlockTrigger.bounds.center, _dashUnlockTrigger.bounds.size);
+            }
+            
+            Gizmos.color = new Color(0.5f, 0f, 1f, 0.5f); // Purple
+            if (_timeCloneUnlockTrigger != null)
+            {
+                Gizmos.DrawWireCube(_timeCloneUnlockTrigger.bounds.center, _timeCloneUnlockTrigger.bounds.size);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Helper component added to unlock trigger colliders
+    /// </summary>
+    public class AbilityUnlockTrigger : MonoBehaviour
+    {
+        public enum AbilityType { Dash, TimeClone }
+        
+        private GameManager _gameManager;
+        private AbilityType _abilityType;
+        private bool _hasTriggered;
+
+        public void Initialize(GameManager manager, AbilityType type)
+        {
+            _gameManager = manager;
+            _abilityType = type;
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (_hasTriggered) return;
+
+            // Only trigger for real player (not clones, not DashSprite)
+            if (!other.TryGetComponent<UltimatePlayerController>(out _)) return;
+            if (other.GetComponent<TimeClone>() != null) return;
+
+            _hasTriggered = true;
+
+            switch (_abilityType)
+            {
+                case AbilityType.Dash:
+                    _gameManager.UnlockDash();
+                    break;
+                case AbilityType.TimeClone:
+                    _gameManager.UnlockTimeClone();
+                    break;
             }
         }
     }
