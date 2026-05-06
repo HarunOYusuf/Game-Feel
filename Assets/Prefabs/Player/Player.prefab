@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 1135653600121736641}
   - component: {fileID: 1865362285011563892}
   - component: {fileID: 6496496542103150951}
+  - component: {fileID: 1001593300939490536}
   m_Layer: 3
   m_Name: Player
   m_TagString: Untagged
@@ -156,7 +157,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2850172336614300391}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3f36c76f02e650740a1a6225680883ff, type: 3}
   m_Name: 
@@ -170,6 +171,23 @@ MonoBehaviour:
   _spawnKey: 114
   _spawnJoystickButton: 332
   _spawnCooldown: 0.5
+--- !u!114 &1001593300939490536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2850172336614300391}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 915286e9274ed764e849ea3bb56c6f07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _clonePrefab: {fileID: 3782571018942737372, guid: 515063bcd69425442a3f1b7fd58e48d3, type: 3}
+  _maxRecordingTime: 5
+  _destroyOnComplete: 0
+  _maxClones: 1
+  _showDebugMessages: 1
 --- !u!1 &4237647838444893951
 GameObject:
   m_ObjectHideFlags: 0

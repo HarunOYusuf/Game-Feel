@@ -4955,6 +4955,7 @@ GameObject:
   - component: {fileID: 6146770160892067226}
   - component: {fileID: 7588394745082905626}
   - component: {fileID: 8383998173185445655}
+  - component: {fileID: 4384922247409495985}
   m_Layer: 3
   m_Name: Time Clone
   m_TagString: Untagged
@@ -4988,14 +4989,14 @@ Rigidbody2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3782571018942737372}
-  m_BodyType: 1
+  m_BodyType: 0
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 0
+  m_GravityScale: 3
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -5051,7 +5052,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3782571018942737372}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 74f7fcb1a9f76e549b41b906f91b775e, type: 3}
   m_Name: 
@@ -5076,6 +5077,33 @@ MonoBehaviour:
   _spawnParticles: {fileID: 0}
   _despawnParticles: {fileID: 0}
   _fallCheckWidth: 0.3
+--- !u!114 &4384922247409495985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3782571018942737372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 152cf4091db2c264794399dd8087ba95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _moveSpeed: 8
+  _acceleration: 50
+  _deceleration: 50
+  _jumpForce: 14
+  _gravityScale: 3
+  _fallGravityMultiplier: 1.5
+  _groundLayer:
+    serializedVersion: 2
+    m_Bits: 64
+  _groundCheckDistance: 0.1
+  _ghostAlpha: 0.5
+  _flipSprite: 1
+  _speedParam: Speed
+  _groundedParam: IsGrounded
+  _verticalVelocityParam: VerticalVelocity
 --- !u!1 &5626296837889164131
 GameObject:
   m_ObjectHideFlags: 0
