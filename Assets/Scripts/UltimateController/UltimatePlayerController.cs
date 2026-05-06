@@ -38,6 +38,10 @@ namespace UltimateController
         public int WallDirection => _wallDirection;
         public int FacingDirection => _facingDirection;
         
+        // Expose current frame input for clone recording
+        public FrameInput CurrentFrameInput => _frameInput;
+        public bool IsDashing => _isDashing;
+        
         public event Action<bool, float> GroundedChanged;
         public event Action Jumped;
         public event Action<bool> DashChanged;

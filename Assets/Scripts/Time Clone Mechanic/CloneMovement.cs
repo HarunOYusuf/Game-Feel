@@ -19,25 +19,26 @@ namespace UltimateController
     public class CloneMovement : MonoBehaviour
     {
         [Header("Movement (Match to Player)")]
-        [SerializeField] private float _moveSpeed = 8f;
-        [SerializeField] private float _acceleration = 50f;
-        [SerializeField] private float _deceleration = 50f;
-
+        [SerializeField] private float _moveSpeed = 9.9f;
+        [SerializeField] private float _acceleration = 105f;
+        [SerializeField] private float _deceleration = 60f;
+        
         [Header("Jump (Match to Player)")]
-        [SerializeField] private float _jumpForce = 14f;
+        [SerializeField] private float _jumpForce = 30f;
         [SerializeField] private float _gravityScale = 3f;
         [SerializeField] private float _fallGravityMultiplier = 1.5f;
-
+        [SerializeField] private float _jumpCutMultiplier = 3f;
+        
         [Header("Wall Slide (Match to Player)")]
-        [SerializeField] private float _wallSlideSpeed = 2f;
-        [SerializeField] private float _wallJumpForce = 14f;
-        [SerializeField] private Vector2 _wallJumpAngle = new Vector2(1f, 1.5f);
-
+        [SerializeField] private float _wallSlideSpeed = 5f;
+        [SerializeField] private float _wallJumpHorizontalPower = 16f;
+        [SerializeField] private float _wallJumpVerticalPower = 22f;
+        
         [Header("Dash (Match to Player)")]
-        [SerializeField] private float _dashSpeed = 20f;
+        [SerializeField] private float _dashSpeed = 30f;
         [SerializeField] private float _dashDuration = 0.15f;
-        [SerializeField] private float _dashCooldown = 0.3f;
-
+        [SerializeField] private float _dashEndSpeed = 10f;
+        
         [Header("Ground Detection")]
         [SerializeField] private LayerMask _groundLayer;
         [SerializeField] private LayerMask _wallLayer;
@@ -79,12 +80,14 @@ namespace UltimateController
         private bool _isWallSliding;
         private int _wallDirection;
         private float _idleTimer;
-
+        private bool _endedJumpEarly;
+        
         // Dash state
         private bool _isDashing;
         private float _dashTimer;
         private float _dashCooldownTimer;
         private Vector2 _dashDirection;
+        private bool _canDash = true;
 
         // Events
         public event Action OnPlaybackComplete;
@@ -99,10 +102,10 @@ namespace UltimateController
         {
             _rb = GetComponent<Rigidbody2D>();
             _capsule = GetComponent<CapsuleCollider2D>();
-
+            
             _sr = GetComponent<SpriteRenderer>();
             if (_sr == null) _sr = GetComponentInChildren<SpriteRenderer>();
-
+            
             _animator = GetComponent<Animator>();
             if (_animator == null) _animator = GetComponentInChildren<Animator>();
 
@@ -112,7 +115,7 @@ namespace UltimateController
             _rb.freezeRotation = true;
             _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-
+            
             // Collider must not be trigger
             _capsule.isTrigger = false;
 
@@ -173,6 +176,7 @@ namespace UltimateController
             _isPlaying = true;
             _playbackComplete = false;
             _facingDirection = startFacingDirection;
+            _canDash = true;
 
             // Set starting position
             transform.position = inputs[0].StartPosition;
@@ -224,19 +228,39 @@ namespace UltimateController
                 _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, -_wallSlideSpeed);
             }
 
-            // Apply gravity multiplier when falling
-            if (!_isGrounded && !_isWallSliding && _rb.linearVelocity.y < 0)
+            // Apply gravity with variable jump height support
+            if (!_isGrounded && !_isWallSliding)
             {
-                _rb.gravityScale = _gravityScale * _fallGravityMultiplier;
+                float gravity = _gravityScale;
+                
+                // If ended jump early and still moving up, apply extra gravity
+                if (_endedJumpEarly && _rb.linearVelocity.y > 0)
+                {
+                    gravity *= _jumpCutMultiplier;
+                }
+                // Extra gravity when falling
+                else if (_rb.linearVelocity.y < 0)
+                {
+                    gravity *= _fallGravityMultiplier;
+                }
+                
+                _rb.gravityScale = gravity;
             }
             else
             {
                 _rb.gravityScale = _gravityScale;
             }
+            
+            // Reset ended jump early when grounded
+            if (_isGrounded)
+            {
+                _endedJumpEarly = false;
+                _canDash = true;
+            }
 
             // Update animator
             UpdateAnimator();
-
+            
             _wasGrounded = _isGrounded;
         }
 
@@ -247,9 +271,6 @@ namespace UltimateController
 
             RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, _groundCheckDistance, _groundLayer);
             _isGrounded = hit.collider != null;
-
-            // Debug
-            Debug.DrawRay(origin, Vector2.down * _groundCheckDistance, _isGrounded ? Color.green : Color.red);
         }
 
         private void CheckWalls()
@@ -274,10 +295,6 @@ namespace UltimateController
             {
                 _wallDirection = 0;
             }
-
-            // Debug
-            Debug.DrawRay(origin, Vector2.right * checkWidth, rightHit.collider != null ? Color.blue : Color.grey);
-            Debug.DrawRay(origin, Vector2.left * checkWidth, leftHit.collider != null ? Color.blue : Color.grey);
         }
 
         private void ProcessPlayback()
@@ -299,36 +316,40 @@ namespace UltimateController
             // Get current input
             var input = _inputs[_currentIndex];
 
-            // Check for dash
-            if (input.DashPressed && _dashCooldownTimer <= 0 && !_isDashing)
+            // Check for variable jump height (ended jump early)
+            if (!_endedJumpEarly && !_isGrounded && !input.JumpHeld && _rb.linearVelocity.y > 0)
             {
-                Debug.Log($"CloneMovement: DASH triggered at playback time {_playbackTime:F2}s");
-                StartDash(input.HorizontalInput);
+                _endedJumpEarly = true;
+            }
+
+            // Check for dash - use the RECORDED dash direction
+            if (input.DashPressed && _canDash && !_isDashing)
+            {
+                StartDash(input.DashDirection);
                 return;
             }
 
             // Check for wall slide
-            bool canWallSlide = !_isGrounded && _wallDirection != 0 &&
+            bool canWallSlide = !_isGrounded && _wallDirection != 0 && 
                                 ((input.HorizontalInput > 0 && _wallDirection > 0) ||
                                  (input.HorizontalInput < 0 && _wallDirection < 0));
             _isWallSliding = canWallSlide;
+            
+            if (_isWallSliding)
+            {
+                _canDash = true;
+            }
 
             // Apply jump
             if (input.JumpPressed)
             {
                 if (_isGrounded)
                 {
-                    Debug.Log($"CloneMovement: JUMP triggered at playback time {_playbackTime:F2}s (grounded)");
                     Jump();
                 }
-                else if (_isWallSliding)
+                else if (_isWallSliding || _wallDirection != 0)
                 {
-                    Debug.Log($"CloneMovement: WALL JUMP triggered at playback time {_playbackTime:F2}s");
                     WallJump();
-                }
-                else
-                {
-                    Debug.Log($"CloneMovement: Jump input received but not grounded or wall sliding");
                 }
             }
 
@@ -358,10 +379,10 @@ namespace UltimateController
         {
             float targetSpeed = horizontal * _moveSpeed;
             float currentSpeed = _rb.linearVelocity.x;
-
+            
             float accel = Mathf.Abs(targetSpeed) > 0.1f ? _acceleration : _deceleration;
             float newSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accel * Time.fixedDeltaTime);
-
+            
             _rb.linearVelocity = new Vector2(newSpeed, _rb.linearVelocity.y);
         }
 
@@ -369,34 +390,39 @@ namespace UltimateController
         {
             _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _jumpForce);
             _isGrounded = false;
+            _endedJumpEarly = false;
         }
 
         private void WallJump()
         {
             // Jump away from wall
-            Vector2 jumpDirection = new Vector2(-_wallDirection * _wallJumpAngle.x, _wallJumpAngle.y).normalized;
-            _rb.linearVelocity = jumpDirection * _wallJumpForce;
-
+            int jumpDirection = -_wallDirection;
+            _rb.linearVelocity = new Vector2(
+                jumpDirection * _wallJumpHorizontalPower,
+                _wallJumpVerticalPower
+            );
+            
             _isWallSliding = false;
-            _facingDirection = -_wallDirection;
+            _facingDirection = jumpDirection;
+            _endedJumpEarly = false;
         }
 
-        private void StartDash(float horizontalInput)
+        private void StartDash(Vector2 dashDirection)
         {
             _isDashing = true;
             _dashTimer = _dashDuration;
-            _dashCooldownTimer = _dashCooldown;
-
-            // Dash in facing direction or input direction
-            if (Mathf.Abs(horizontalInput) > 0.1f)
+            _canDash = false;
+            
+            // Use the recorded dash direction
+            if (dashDirection != Vector2.zero)
             {
-                _dashDirection = new Vector2(Mathf.Sign(horizontalInput), 0f);
+                _dashDirection = dashDirection.normalized;
             }
             else
             {
                 _dashDirection = new Vector2(_facingDirection, 0f);
             }
-
+            
             // Stop gravity during dash
             _rb.gravityScale = 0f;
             _rb.linearVelocity = _dashDirection * _dashSpeed;
@@ -405,10 +431,10 @@ namespace UltimateController
         private void ProcessDash()
         {
             _dashTimer -= Time.fixedDeltaTime;
-
+            
             // Keep dash velocity
             _rb.linearVelocity = _dashDirection * _dashSpeed;
-
+            
             if (_dashTimer <= 0)
             {
                 EndDash();
@@ -419,7 +445,7 @@ namespace UltimateController
         {
             _isDashing = false;
             _rb.gravityScale = _gravityScale;
-            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x * 0.5f, 0f);
+            _rb.linearVelocity = _dashDirection * _dashEndSpeed;
         }
 
         private void CompletePlayback()
