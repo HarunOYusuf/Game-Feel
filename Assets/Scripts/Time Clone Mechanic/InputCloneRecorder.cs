@@ -26,7 +26,7 @@ namespace UltimateController
         [Header("Settings")]
         [Tooltip("Destroy clone when playback completes?")]
         [SerializeField] private bool _destroyOnComplete = false;
-        
+
         [Tooltip("Maximum number of active clones")]
         [SerializeField] private int _maxClones = 3;
 
@@ -38,10 +38,10 @@ namespace UltimateController
         private float _recordingStartTime;
         private List<CloneInputSnapshot> _currentRecording = new List<CloneInputSnapshot>();
         private List<CloneMovement> _activeClones = new List<CloneMovement>();
-        
+
         // Components
         private UltimatePlayerController _playerController;
-        
+
         // Input tracking
         private bool _jumpPressedThisFrame;
         private bool _dashPressedThisFrame;
@@ -62,9 +62,9 @@ namespace UltimateController
 
         private void Update()
         {
-            // Check clone button (Square on PlayStation = JoystickButton2, but you said JoystickButton3)
+            // Check clone button (Square on PlayStation = JoystickButton2)
             bool cloneButtonPressed = Input.GetKeyDown(KeyCode.JoystickButton2) || Input.GetKeyDown(KeyCode.Q);
-            
+
             if (cloneButtonPressed && RecordingEnabled)
             {
                 if (_isRecording)
@@ -77,13 +77,21 @@ namespace UltimateController
                 }
             }
 
-            // Track jump/dash presses (edge detection)
+            // Track jump/dash presses (edge detection) - accumulate until FixedUpdate reads them
             bool currentJump = Input.GetKey(KeyCode.JoystickButton0) || Input.GetKey(KeyCode.Space);
             bool currentDash = Input.GetKey(KeyCode.JoystickButton1) || Input.GetKey(KeyCode.LeftShift);
-            
-            _jumpPressedThisFrame = currentJump && !_lastJumpState;
-            _dashPressedThisFrame = currentDash && !_lastDashState;
-            
+
+            // Detect button DOWN (not just held)
+            if ((Input.GetKeyDown(KeyCode.JoystickButton0) || Input.GetKeyDown(KeyCode.Space)) && !_jumpPressedThisFrame)
+            {
+                _jumpPressedThisFrame = true;
+            }
+
+            if ((Input.GetKeyDown(KeyCode.JoystickButton1) || Input.GetKeyDown(KeyCode.LeftShift)) && !_dashPressedThisFrame)
+            {
+                _dashPressedThisFrame = true;
+            }
+
             _lastJumpState = currentJump;
             _lastDashState = currentDash;
         }
@@ -93,14 +101,14 @@ namespace UltimateController
             if (_isRecording)
             {
                 RecordFrame();
-                
+
                 // Check max time
                 if (RecordingTime >= _maxRecordingTime)
                 {
                     StopRecordingAndSpawn();
                 }
             }
-            
+
             // Clean up destroyed clones
             _activeClones.RemoveAll(c => c == null);
         }
@@ -108,7 +116,7 @@ namespace UltimateController
         public void SetRecordingEnabled(bool enabled)
         {
             RecordingEnabled = enabled;
-            
+
             if (!enabled && _isRecording)
             {
                 CancelRecording();
@@ -128,10 +136,21 @@ namespace UltimateController
         private void RecordFrame()
         {
             float timestamp = Time.time - _recordingStartTime;
-            
+
             // Get current inputs
             float horizontal = Input.GetAxisRaw("Horizontal");
             bool jumpHeld = Input.GetKey(KeyCode.JoystickButton0) || Input.GetKey(KeyCode.Space);
+
+            // Get player state
+            bool isGrounded = _playerController != null ? _playerController.IsGrounded : false;
+            bool isWallSliding = _playerController != null ? _playerController.IsWallSliding : false;
+            int wallDirection = _playerController != null ? _playerController.WallDirection : 0;
+
+            // Debug: Log when jump or dash is recorded
+            if (_jumpPressedThisFrame)
+                Debug.Log($"InputCloneRecorder: Recording JUMP at {timestamp:F2}s");
+            if (_dashPressedThisFrame)
+                Debug.Log($"InputCloneRecorder: Recording DASH at {timestamp:F2}s");
 
             var snapshot = new CloneInputSnapshot(
                 timestamp,
@@ -139,13 +158,16 @@ namespace UltimateController
                 _jumpPressedThisFrame,
                 jumpHeld,
                 _dashPressedThisFrame,
+                isGrounded,
+                isWallSliding,
+                wallDirection,
                 transform.position,
                 _playerController != null ? _playerController.FacingDirection : 1
             );
 
             _currentRecording.Add(snapshot);
-            
-            // Reset edge detection
+
+            // Reset edge detection AFTER recording
             _jumpPressedThisFrame = false;
             _dashPressedThisFrame = false;
         }

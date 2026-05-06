@@ -22,16 +22,32 @@ namespace UltimateController
         [SerializeField] private float _moveSpeed = 8f;
         [SerializeField] private float _acceleration = 50f;
         [SerializeField] private float _deceleration = 50f;
-        
+
         [Header("Jump (Match to Player)")]
         [SerializeField] private float _jumpForce = 14f;
         [SerializeField] private float _gravityScale = 3f;
         [SerializeField] private float _fallGravityMultiplier = 1.5f;
-        
+
+        [Header("Wall Slide (Match to Player)")]
+        [SerializeField] private float _wallSlideSpeed = 2f;
+        [SerializeField] private float _wallJumpForce = 14f;
+        [SerializeField] private Vector2 _wallJumpAngle = new Vector2(1f, 1.5f);
+
+        [Header("Dash (Match to Player)")]
+        [SerializeField] private float _dashSpeed = 20f;
+        [SerializeField] private float _dashDuration = 0.15f;
+        [SerializeField] private float _dashCooldown = 0.3f;
+
         [Header("Ground Detection")]
         [SerializeField] private LayerMask _groundLayer;
+        [SerializeField] private LayerMask _wallLayer;
         [SerializeField] private float _groundCheckDistance = 0.1f;
-        
+        [SerializeField] private float _wallCheckDistance = 0.1f;
+
+        [Header("Lifetime")]
+        [Tooltip("Destroy clone after playback completes + this many seconds (0 = never)")]
+        [SerializeField] private float _idleLifetime = 5f;
+
         [Header("Visuals")]
         [SerializeField] private float _ghostAlpha = 0.5f;
         [SerializeField] private bool _flipSprite = true;
@@ -40,6 +56,8 @@ namespace UltimateController
         [SerializeField] private string _speedParam = "Speed";
         [SerializeField] private string _groundedParam = "IsGrounded";
         [SerializeField] private string _verticalVelocityParam = "VerticalVelocity";
+        [SerializeField] private string _wallSlidingParam = "IsWallSliding";
+        [SerializeField] private string _dashingParam = "IsDashing";
 
         // Components
         private Rigidbody2D _rb;
@@ -58,6 +76,15 @@ namespace UltimateController
         private int _facingDirection = 1;
         private bool _isGrounded;
         private bool _wasGrounded;
+        private bool _isWallSliding;
+        private int _wallDirection;
+        private float _idleTimer;
+
+        // Dash state
+        private bool _isDashing;
+        private float _dashTimer;
+        private float _dashCooldownTimer;
+        private Vector2 _dashDirection;
 
         // Events
         public event Action OnPlaybackComplete;
@@ -65,16 +92,17 @@ namespace UltimateController
         // Public state
         public bool IsPlaying => _isPlaying;
         public bool IsGrounded => _isGrounded;
+        public bool IsWallSliding => _isWallSliding;
         public int FacingDirection => _facingDirection;
 
         private void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
             _capsule = GetComponent<CapsuleCollider2D>();
-            
+
             _sr = GetComponent<SpriteRenderer>();
             if (_sr == null) _sr = GetComponentInChildren<SpriteRenderer>();
-            
+
             _animator = GetComponent<Animator>();
             if (_animator == null) _animator = GetComponentInChildren<Animator>();
 
@@ -84,7 +112,7 @@ namespace UltimateController
             _rb.freezeRotation = true;
             _rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
             _rb.interpolation = RigidbodyInterpolation2D.Interpolate;
-            
+
             // Collider must not be trigger
             _capsule.isTrigger = false;
 
@@ -96,10 +124,14 @@ namespace UltimateController
                 _sr.color = c;
             }
 
-            // Set default ground layer
+            // Set default layers
             if (_groundLayer == 0)
             {
                 _groundLayer = LayerMask.GetMask("Ground", "Default");
+            }
+            if (_wallLayer == 0)
+            {
+                _wallLayer = LayerMask.GetMask("Wall", "Ground", "Default");
             }
 
             // Ignore collision with player
@@ -150,17 +182,50 @@ namespace UltimateController
 
         private void FixedUpdate()
         {
-            // Always do ground check
+            // Update timers
+            if (_dashCooldownTimer > 0)
+                _dashCooldownTimer -= Time.fixedDeltaTime;
+
+            // Always do ground and wall check
             CheckGround();
+            CheckWalls();
+
+            // Handle dash
+            if (_isDashing)
+            {
+                ProcessDash();
+                UpdateAnimator();
+                return;
+            }
 
             if (_isPlaying && _inputs != null)
             {
                 _playbackTime += Time.fixedDeltaTime;
                 ProcessPlayback();
             }
+            else if (_playbackComplete)
+            {
+                // Idle timer - destroy after timeout
+                if (_idleLifetime > 0)
+                {
+                    _idleTimer += Time.fixedDeltaTime;
+                    if (_idleTimer >= _idleLifetime)
+                    {
+                        Debug.Log("CloneMovement: Idle timeout, destroying clone.");
+                        Destroy(gameObject);
+                        return;
+                    }
+                }
+            }
+
+            // Apply wall slide
+            if (_isWallSliding)
+            {
+                _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, -_wallSlideSpeed);
+            }
 
             // Apply gravity multiplier when falling
-            if (!_isGrounded && _rb.linearVelocity.y < 0)
+            if (!_isGrounded && !_isWallSliding && _rb.linearVelocity.y < 0)
             {
                 _rb.gravityScale = _gravityScale * _fallGravityMultiplier;
             }
@@ -171,7 +236,7 @@ namespace UltimateController
 
             // Update animator
             UpdateAnimator();
-            
+
             _wasGrounded = _isGrounded;
         }
 
@@ -182,9 +247,37 @@ namespace UltimateController
 
             RaycastHit2D hit = Physics2D.Raycast(origin, Vector2.down, _groundCheckDistance, _groundLayer);
             _isGrounded = hit.collider != null;
-            
+
             // Debug
             Debug.DrawRay(origin, Vector2.down * _groundCheckDistance, _isGrounded ? Color.green : Color.red);
+        }
+
+        private void CheckWalls()
+        {
+            Vector2 origin = (Vector2)transform.position + _capsule.offset;
+            float checkWidth = _capsule.size.x / 2f + _wallCheckDistance;
+
+            // Check right
+            RaycastHit2D rightHit = Physics2D.Raycast(origin, Vector2.right, checkWidth, _wallLayer);
+            // Check left
+            RaycastHit2D leftHit = Physics2D.Raycast(origin, Vector2.left, checkWidth, _wallLayer);
+
+            if (rightHit.collider != null)
+            {
+                _wallDirection = 1;
+            }
+            else if (leftHit.collider != null)
+            {
+                _wallDirection = -1;
+            }
+            else
+            {
+                _wallDirection = 0;
+            }
+
+            // Debug
+            Debug.DrawRay(origin, Vector2.right * checkWidth, rightHit.collider != null ? Color.blue : Color.grey);
+            Debug.DrawRay(origin, Vector2.left * checkWidth, leftHit.collider != null ? Color.blue : Color.grey);
         }
 
         private void ProcessPlayback()
@@ -206,13 +299,43 @@ namespace UltimateController
             // Get current input
             var input = _inputs[_currentIndex];
 
-            // Apply horizontal movement
-            ApplyMovement(input.HorizontalInput);
+            // Check for dash
+            if (input.DashPressed && _dashCooldownTimer <= 0 && !_isDashing)
+            {
+                Debug.Log($"CloneMovement: DASH triggered at playback time {_playbackTime:F2}s");
+                StartDash(input.HorizontalInput);
+                return;
+            }
+
+            // Check for wall slide
+            bool canWallSlide = !_isGrounded && _wallDirection != 0 &&
+                                ((input.HorizontalInput > 0 && _wallDirection > 0) ||
+                                 (input.HorizontalInput < 0 && _wallDirection < 0));
+            _isWallSliding = canWallSlide;
 
             // Apply jump
-            if (input.JumpPressed && _isGrounded)
+            if (input.JumpPressed)
             {
-                Jump();
+                if (_isGrounded)
+                {
+                    Debug.Log($"CloneMovement: JUMP triggered at playback time {_playbackTime:F2}s (grounded)");
+                    Jump();
+                }
+                else if (_isWallSliding)
+                {
+                    Debug.Log($"CloneMovement: WALL JUMP triggered at playback time {_playbackTime:F2}s");
+                    WallJump();
+                }
+                else
+                {
+                    Debug.Log($"CloneMovement: Jump input received but not grounded or wall sliding");
+                }
+            }
+
+            // Apply horizontal movement (reduced during wall slide)
+            if (!_isWallSliding)
+            {
+                ApplyMovement(input.HorizontalInput);
             }
 
             // Update facing direction
@@ -221,11 +344,12 @@ namespace UltimateController
                 _facingDirection = input.HorizontalInput > 0 ? 1 : -1;
             }
 
-            // Flip sprite
+            // Flip sprite (face away from wall when wall sliding)
             if (_flipSprite && _sr != null)
             {
+                int visualDirection = _isWallSliding ? -_wallDirection : _facingDirection;
                 Vector3 scale = _sr.transform.localScale;
-                scale.x = Mathf.Abs(scale.x) * _facingDirection;
+                scale.x = Mathf.Abs(scale.x) * visualDirection;
                 _sr.transform.localScale = scale;
             }
         }
@@ -234,17 +358,68 @@ namespace UltimateController
         {
             float targetSpeed = horizontal * _moveSpeed;
             float currentSpeed = _rb.linearVelocity.x;
-            
+
             float accel = Mathf.Abs(targetSpeed) > 0.1f ? _acceleration : _deceleration;
             float newSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, accel * Time.fixedDeltaTime);
-            
+
             _rb.linearVelocity = new Vector2(newSpeed, _rb.linearVelocity.y);
         }
 
         private void Jump()
         {
             _rb.linearVelocity = new Vector2(_rb.linearVelocity.x, _jumpForce);
-            Debug.Log("CloneMovement: Jump!");
+            _isGrounded = false;
+        }
+
+        private void WallJump()
+        {
+            // Jump away from wall
+            Vector2 jumpDirection = new Vector2(-_wallDirection * _wallJumpAngle.x, _wallJumpAngle.y).normalized;
+            _rb.linearVelocity = jumpDirection * _wallJumpForce;
+
+            _isWallSliding = false;
+            _facingDirection = -_wallDirection;
+        }
+
+        private void StartDash(float horizontalInput)
+        {
+            _isDashing = true;
+            _dashTimer = _dashDuration;
+            _dashCooldownTimer = _dashCooldown;
+
+            // Dash in facing direction or input direction
+            if (Mathf.Abs(horizontalInput) > 0.1f)
+            {
+                _dashDirection = new Vector2(Mathf.Sign(horizontalInput), 0f);
+            }
+            else
+            {
+                _dashDirection = new Vector2(_facingDirection, 0f);
+            }
+
+            // Stop gravity during dash
+            _rb.gravityScale = 0f;
+            _rb.linearVelocity = _dashDirection * _dashSpeed;
+        }
+
+        private void ProcessDash()
+        {
+            _dashTimer -= Time.fixedDeltaTime;
+
+            // Keep dash velocity
+            _rb.linearVelocity = _dashDirection * _dashSpeed;
+
+            if (_dashTimer <= 0)
+            {
+                EndDash();
+            }
+        }
+
+        private void EndDash()
+        {
+            _isDashing = false;
+            _rb.gravityScale = _gravityScale;
+            _rb.linearVelocity = new Vector2(_rb.linearVelocity.x * 0.5f, 0f);
         }
 
         private void CompletePlayback()
@@ -264,6 +439,8 @@ namespace UltimateController
             _animator.SetFloat(_speedParam, Mathf.Abs(_rb.linearVelocity.x));
             _animator.SetBool(_groundedParam, _isGrounded);
             _animator.SetFloat(_verticalVelocityParam, _rb.linearVelocity.y);
+            _animator.SetBool(_wallSlidingParam, _isWallSliding);
+            _animator.SetBool(_dashingParam, _isDashing);
         }
 
         // Trigger detection for keys, hazards, etc.

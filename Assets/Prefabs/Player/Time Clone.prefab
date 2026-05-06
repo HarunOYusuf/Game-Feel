@@ -5095,15 +5095,28 @@ MonoBehaviour:
   _jumpForce: 14
   _gravityScale: 3
   _fallGravityMultiplier: 1.5
+  _wallSlideSpeed: 2
+  _wallJumpForce: 14
+  _wallJumpAngle: {x: 1, y: 1.5}
+  _dashSpeed: 20
+  _dashDuration: 0.15
+  _dashCooldown: 0.3
   _groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  _wallLayer:
+    serializedVersion: 2
+    m_Bits: 128
   _groundCheckDistance: 0.1
+  _wallCheckDistance: 0.1
+  _idleLifetime: 5
   _ghostAlpha: 0.5
   _flipSprite: 1
   _speedParam: Speed
   _groundedParam: IsGrounded
   _verticalVelocityParam: VerticalVelocity
+  _wallSlidingParam: IsWallSliding
+  _dashingParam: IsDashing
 --- !u!1 &5626296837889164131
 GameObject:
   m_ObjectHideFlags: 0

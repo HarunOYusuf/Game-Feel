@@ -10,13 +10,18 @@ namespace UltimateController
     public struct CloneInputSnapshot
     {
         public float Timestamp;
-        
+
         // Inputs
         public float HorizontalInput;
         public bool JumpPressed;
         public bool JumpHeld;
         public bool DashPressed;
-        
+
+        // State (needed for wall sliding/jumping)
+        public bool IsGrounded;
+        public bool IsWallSliding;
+        public int WallDirection;
+
         // Starting state (only used for first frame)
         public Vector2 StartPosition;
         public int StartFacingDirection;
@@ -27,6 +32,9 @@ namespace UltimateController
             bool jumpPressed,
             bool jumpHeld,
             bool dashPressed,
+            bool isGrounded,
+            bool isWallSliding,
+            int wallDirection,
             Vector2 position,
             int facingDirection)
         {
@@ -35,6 +43,9 @@ namespace UltimateController
             JumpPressed = jumpPressed;
             JumpHeld = jumpHeld;
             DashPressed = dashPressed;
+            IsGrounded = isGrounded;
+            IsWallSliding = isWallSliding;
+            WallDirection = wallDirection;
             StartPosition = position;
             StartFacingDirection = facingDirection;
         }
