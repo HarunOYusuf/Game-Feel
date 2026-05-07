@@ -162,19 +162,14 @@ namespace UltimateController
 
             _frameInput = new FrameInput
             {
-                // Jump: Space / X button (JoystickButton0)
                 JumpDown = UnityEngine.Input.GetButtonDown("Jump") || 
-                           UnityEngine.Input.GetKeyDown(KeyCode.Space) ||
-                           UnityEngine.Input.GetKeyDown(KeyCode.JoystickButton0),
+                           UnityEngine.Input.GetKeyDown(KeyCode.Space),
                            
                 JumpHeld = UnityEngine.Input.GetButton("Jump") || 
-                           UnityEngine.Input.GetKey(KeyCode.Space) ||
-                           UnityEngine.Input.GetKey(KeyCode.JoystickButton0),
+                           UnityEngine.Input.GetKey(KeyCode.Space),
                            
-                // Dash: Left Shift / K / Circle button (JoystickButton1)
                 DashDown = UnityEngine.Input.GetKeyDown(KeyCode.LeftShift) || 
-                           UnityEngine.Input.GetKeyDown(KeyCode.K) ||
-                           UnityEngine.Input.GetKeyDown(KeyCode.JoystickButton1),
+                           UnityEngine.Input.GetKeyDown(KeyCode.K),
                            
                 Move = new Vector2(
                     UnityEngine.Input.GetAxisRaw("Horizontal"), 

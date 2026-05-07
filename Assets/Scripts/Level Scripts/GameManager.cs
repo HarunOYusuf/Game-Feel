@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using TMPro;
 
 namespace UltimateController
 {
@@ -13,6 +15,7 @@ namespace UltimateController
     /// 3. Assign the player and spawn point
     /// 4. Configure which abilities are available in this level
     /// 5. Optionally assign unlock trigger zones
+    /// 6. Assign level end trigger for completion
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -44,6 +47,13 @@ namespace UltimateController
         [Tooltip("When player enters this trigger, time clone is unlocked")]
         [SerializeField] private Collider2D _timeCloneUnlockTrigger;
 
+        [Header("Level End")]
+        [Tooltip("When player enters this trigger, level is complete")]
+        [SerializeField] private Collider2D _levelEndTrigger;
+        
+        [Tooltip("UI Panel to show on completion (optional - will create one if not assigned)")]
+        [SerializeField] private GameObject _completionPanel;
+
         [Header("Debug")]
         [SerializeField] private bool _showDebugMessages = true;
 
@@ -57,6 +67,7 @@ namespace UltimateController
         // Player components
         private UltimatePlayerController _playerController;
         private TimeCloneRecorder _cloneRecorder;
+        private InputCloneRecorder _inputCloneRecorder;
 
         // Current ability states (can be unlocked during gameplay)
         private bool _dashEnabled;
@@ -65,6 +76,9 @@ namespace UltimateController
         // Stats
         private int _deathCount;
         private float _levelStartTime;
+        
+        // Level complete state
+        private bool _levelComplete;
 
         // Public accessors
         public string LevelName => _levelName;
@@ -72,6 +86,7 @@ namespace UltimateController
         public float LevelTime => Time.time - _levelStartTime;
         public bool DashEnabled => _dashEnabled;
         public bool TimeCloneEnabled => _timeCloneEnabled;
+        public bool LevelComplete => _levelComplete;
 
         private void Awake()
         {
@@ -93,6 +108,7 @@ namespace UltimateController
             {
                 _playerController = _player.GetComponent<UltimatePlayerController>();
                 _cloneRecorder = _player.GetComponent<TimeCloneRecorder>();
+                _inputCloneRecorder = _player.GetComponent<InputCloneRecorder>();
                 
                 // Ensure player has an inventory
                 if (_player.GetComponent<PlayerInventory>() == null)
@@ -129,12 +145,21 @@ namespace UltimateController
 
             // Setup unlock triggers
             SetupUnlockTriggers();
+            
+            // Setup level end trigger
+            SetupLevelEndTrigger();
 
             // Apply ability settings
             ApplyAbilitySettings();
 
             // Spawn player at start
             SpawnPlayer();
+            
+            // Hide completion panel at start
+            if (_completionPanel != null)
+            {
+                _completionPanel.SetActive(false);
+            }
 
             if (_showDebugMessages)
                 Debug.Log($"GameManager: {_levelName} started. Dash: {_dashEnabled}, Clone: {_timeCloneEnabled}");
@@ -156,6 +181,16 @@ namespace UltimateController
                 _timeCloneUnlockTrigger.isTrigger = true;
                 var cloneTrigger = _timeCloneUnlockTrigger.gameObject.AddComponent<AbilityUnlockTrigger>();
                 cloneTrigger.Initialize(this, AbilityUnlockTrigger.AbilityType.TimeClone);
+            }
+        }
+
+        private void SetupLevelEndTrigger()
+        {
+            if (_levelEndTrigger != null)
+            {
+                _levelEndTrigger.isTrigger = true;
+                var endTrigger = _levelEndTrigger.gameObject.AddComponent<LevelEndTrigger>();
+                endTrigger.Initialize(this);
             }
         }
 
@@ -201,6 +236,12 @@ namespace UltimateController
             {
                 _cloneRecorder.enabled = _timeCloneEnabled;
                 _cloneRecorder.SetRecordingEnabled(_timeCloneEnabled);
+            }
+            
+            if (_inputCloneRecorder != null)
+            {
+                _inputCloneRecorder.enabled = _timeCloneEnabled;
+                _inputCloneRecorder.SetRecordingEnabled(_timeCloneEnabled);
             }
         }
 
@@ -249,6 +290,11 @@ namespace UltimateController
             {
                 _cloneRecorder.DestroyAllClones();
             }
+            
+            if (_inputCloneRecorder != null)
+            {
+                _inputCloneRecorder.DestroyAllClones();
+            }
 
             // Respawn player
             SpawnPlayer();
@@ -271,16 +317,93 @@ namespace UltimateController
         /// </summary>
         public void CompleteLevel()
         {
+            if (_levelComplete) return;
+            
+            _levelComplete = true;
             float completionTime = LevelTime;
 
             if (_showDebugMessages)
                 Debug.Log($"GameManager: {_levelName} complete! Time: {completionTime:F2}s, Deaths: {_deathCount}");
 
-            // Load next level if specified
-            if (!string.IsNullOrEmpty(_nextLevelScene))
+            // Disable player movement
+            if (_playerController != null)
             {
-                SceneManager.LoadScene(_nextLevelScene);
+                _playerController.SetMovementEnabled(false);
             }
+
+            // Show completion panel
+            ShowCompletionPanel();
+        }
+
+        /// <summary>
+        /// Show the completion UI panel
+        /// </summary>
+        private void ShowCompletionPanel()
+        {
+            // If panel is assigned, use it
+            if (_completionPanel != null)
+            {
+                _completionPanel.SetActive(true);
+                return;
+            }
+
+            // Otherwise create one dynamically
+            CreateCompletionPanel();
+        }
+
+        /// <summary>
+        /// Creates a completion panel dynamically if none is assigned
+        /// </summary>
+        private void CreateCompletionPanel()
+        {
+            // Find or create Canvas
+            Canvas canvas = FindFirstObjectByType<Canvas>();
+            if (canvas == null)
+            {
+                var canvasObj = new GameObject("CompletionCanvas");
+                canvas = canvasObj.AddComponent<Canvas>();
+                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+                canvasObj.AddComponent<CanvasScaler>();
+                canvasObj.AddComponent<GraphicRaycaster>();
+            }
+
+            // Create panel
+            var panel = new GameObject("CompletionPanel");
+            panel.transform.SetParent(canvas.transform, false);
+
+            var panelRect = panel.AddComponent<RectTransform>();
+            panelRect.anchorMin = Vector2.zero;
+            panelRect.anchorMax = Vector2.one;
+            panelRect.offsetMin = Vector2.zero;
+            panelRect.offsetMax = Vector2.zero;
+
+            var panelImage = panel.AddComponent<Image>();
+            panelImage.color = new Color(0f, 0f, 0f, 0.8f);
+
+            // Create text
+            var textObj = new GameObject("CompletionText");
+            textObj.transform.SetParent(panel.transform, false);
+
+            var textRect = textObj.AddComponent<RectTransform>();
+            textRect.anchorMin = new Vector2(0.5f, 0.5f);
+            textRect.anchorMax = new Vector2(0.5f, 0.5f);
+            textRect.sizeDelta = new Vector2(800, 200);
+            textRect.anchoredPosition = Vector2.zero;
+
+            // Try TextMeshPro first, fall back to legacy Text
+            var tmp = textObj.AddComponent<TextMeshProUGUI>();
+            if (tmp != null)
+            {
+                tmp.text = "Congratulations!\nYou have completed the playtest";
+                tmp.fontSize = 48;
+                tmp.alignment = TextAlignmentOptions.Center;
+                tmp.color = Color.white;
+            }
+
+            _completionPanel = panel;
+            
+            if (_showDebugMessages)
+                Debug.Log("GameManager: Created completion panel");
         }
 
         /// <summary>
@@ -330,6 +453,13 @@ namespace UltimateController
             {
                 Gizmos.DrawWireCube(_timeCloneUnlockTrigger.bounds.center, _timeCloneUnlockTrigger.bounds.size);
             }
+            
+            // Draw level end trigger
+            Gizmos.color = new Color(0f, 1f, 0.5f, 0.5f); // Cyan/Green
+            if (_levelEndTrigger != null)
+            {
+                Gizmos.DrawWireCube(_levelEndTrigger.bounds.center, _levelEndTrigger.bounds.size);
+            }
         }
     }
 
@@ -357,6 +487,7 @@ namespace UltimateController
             // Only trigger for real player (not clones, not DashSprite)
             if (!other.TryGetComponent<UltimatePlayerController>(out _)) return;
             if (other.GetComponent<TimeClone>() != null) return;
+            if (other.GetComponent<CloneMovement>() != null) return;
 
             _hasTriggered = true;
 
@@ -369,6 +500,33 @@ namespace UltimateController
                     _gameManager.UnlockTimeClone();
                     break;
             }
+        }
+    }
+
+    /// <summary>
+    /// Helper component added to level end trigger collider
+    /// </summary>
+    public class LevelEndTrigger : MonoBehaviour
+    {
+        private GameManager _gameManager;
+        private bool _hasTriggered;
+
+        public void Initialize(GameManager manager)
+        {
+            _gameManager = manager;
+        }
+
+        private void OnTriggerEnter2D(Collider2D other)
+        {
+            if (_hasTriggered) return;
+
+            // Only trigger for real player (not clones)
+            if (!other.TryGetComponent<UltimatePlayerController>(out _)) return;
+            if (other.GetComponent<TimeClone>() != null) return;
+            if (other.GetComponent<CloneMovement>() != null) return;
+
+            _hasTriggered = true;
+            _gameManager.CompleteLevel();
         }
     }
 }

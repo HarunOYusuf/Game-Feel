@@ -117,8 +117,8 @@ namespace UltimateController
 
         private void Update()
         {
-            // Check clone button (Square on PlayStation = JoystickButton2)
-            bool cloneButtonPressed = Input.GetKeyDown(KeyCode.JoystickButton2) || Input.GetKeyDown(KeyCode.Q);
+            // Check clone button
+            bool cloneButtonPressed = Input.GetKeyDown(KeyCode.Q);
             
             if (cloneButtonPressed && RecordingEnabled)
             {
@@ -188,7 +188,7 @@ namespace UltimateController
             int wallDirection = _playerController.WallDirection;
             
             // Check if jump is being held (for variable jump height)
-            bool jumpHeld = Input.GetKey(KeyCode.JoystickButton0) || Input.GetKey(KeyCode.Space);
+            bool jumpHeld = Input.GetKey(KeyCode.Space);
 
             var snapshot = new CloneInputSnapshot(
                 timestamp,
