@@ -160,22 +160,37 @@ namespace UltimateController
                 return;
             }
 
-            _frameInput = new FrameInput
+            // Use InputManager if available, otherwise fallback to direct input
+            if (InputManager.Instance != null)
             {
-                JumpDown = UnityEngine.Input.GetButtonDown("Jump") || 
-                           UnityEngine.Input.GetKeyDown(KeyCode.Space),
-                           
-                JumpHeld = UnityEngine.Input.GetButton("Jump") || 
-                           UnityEngine.Input.GetKey(KeyCode.Space),
-                           
-                DashDown = UnityEngine.Input.GetKeyDown(KeyCode.LeftShift) || 
-                           UnityEngine.Input.GetKeyDown(KeyCode.K),
-                           
-                Move = new Vector2(
-                    UnityEngine.Input.GetAxisRaw("Horizontal"), 
-                    UnityEngine.Input.GetAxisRaw("Vertical")
-                )
-            };
+                _frameInput = new FrameInput
+                {
+                    JumpDown = InputManager.Instance.GetButtonDown(InputManager.GameAction.Jump),
+                    JumpHeld = InputManager.Instance.GetButton(InputManager.GameAction.Jump),
+                    DashDown = InputManager.Instance.GetButtonDown(InputManager.GameAction.Dash),
+                    Move = InputManager.Instance.GetMovement()
+                };
+            }
+            else
+            {
+                // Fallback to direct input (no InputManager in scene)
+                _frameInput = new FrameInput
+                {
+                    JumpDown = UnityEngine.Input.GetButtonDown("Jump") || 
+                               UnityEngine.Input.GetKeyDown(KeyCode.Space),
+                               
+                    JumpHeld = UnityEngine.Input.GetButton("Jump") || 
+                               UnityEngine.Input.GetKey(KeyCode.Space),
+                               
+                    DashDown = UnityEngine.Input.GetKeyDown(KeyCode.LeftShift) || 
+                               UnityEngine.Input.GetKeyDown(KeyCode.K),
+                               
+                    Move = new Vector2(
+                        UnityEngine.Input.GetAxisRaw("Horizontal"), 
+                        UnityEngine.Input.GetAxisRaw("Vertical")
+                    )
+                };
+            }
 
             if (_stats.SnapInput)
             {

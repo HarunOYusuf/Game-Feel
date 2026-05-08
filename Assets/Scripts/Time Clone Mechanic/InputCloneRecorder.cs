@@ -117,8 +117,18 @@ namespace UltimateController
 
         private void Update()
         {
-            // Check clone button
-            bool cloneButtonPressed = Input.GetKeyDown(KeyCode.Q);
+            // Check clone button using InputManager
+            bool cloneButtonPressed = false;
+            
+            if (InputManager.Instance != null)
+            {
+                cloneButtonPressed = InputManager.Instance.GetButtonDown(InputManager.GameAction.Clone);
+            }
+            else
+            {
+                // Fallback
+                cloneButtonPressed = Input.GetKeyDown(KeyCode.Q);
+            }
             
             if (cloneButtonPressed && RecordingEnabled)
             {
@@ -188,7 +198,15 @@ namespace UltimateController
             int wallDirection = _playerController.WallDirection;
             
             // Check if jump is being held (for variable jump height)
-            bool jumpHeld = Input.GetKey(KeyCode.Space);
+            bool jumpHeld = false;
+            if (InputManager.Instance != null)
+            {
+                jumpHeld = InputManager.Instance.GetButton(InputManager.GameAction.Jump);
+            }
+            else
+            {
+                jumpHeld = Input.GetKey(KeyCode.Space);
+            }
 
             var snapshot = new CloneInputSnapshot(
                 timestamp,

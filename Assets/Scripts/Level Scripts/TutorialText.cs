@@ -7,10 +7,18 @@ namespace UltimateController
     /// In-world tutorial text that appears when the player enters a zone.
     /// Text stays visible while player is in the zone.
     /// 
+    /// Supports dynamic button placeholders:
+    ///   {JUMP}  → Current jump button (e.g., "X")
+    ///   {DASH}  → Current dash button (e.g., "CIRCLE")
+    ///   {CLONE} → Current clone button (e.g., "SQUARE")
+    /// 
+    /// Example message: "Press {JUMP} to jump!"
+    /// Displays as: "Press X to jump!"
+    /// 
     /// Setup:
     /// 1. Create empty GameObject for each tutorial zone
     /// 2. Add this script
-    /// 3. Set your tutorial messages (supports multiple lines)
+    /// 3. Set your tutorial messages (supports multiple lines and placeholders)
     /// 4. Resize the BoxCollider2D to cover the zone area
     /// </summary>
     [RequireComponent(typeof(BoxCollider2D))]
@@ -18,8 +26,8 @@ namespace UltimateController
     {
         [Header("Text Content")]
         [TextArea(3, 8)]
-        [Tooltip("The tutorial message to display (use \\n for new lines)")]
-        [SerializeField] private string _message = "Use WASD to move\nPress SPACE to jump";
+        [Tooltip("The tutorial message to display. Use {JUMP}, {DASH}, {CLONE} for dynamic buttons.")]
+        [SerializeField] private string _message = "Press {JUMP} to jump!";
 
         [Header("Text Appearance")]
         [SerializeField] private float _fontSize = 5f;
@@ -48,10 +56,36 @@ namespace UltimateController
         private bool _playerInZone;
         private float _currentAlpha;
         private float _targetAlpha;
+        private string _processedMessage;
 
         private void Awake()
         {
             SetupComponents();
+        }
+
+        private void Start()
+        {
+            // Subscribe to binding changes
+            if (InputManager.Instance != null)
+            {
+                InputManager.Instance.OnBindingsChanged += OnBindingsChanged;
+            }
+            
+            // Process message with current bindings
+            UpdateProcessedMessage();
+        }
+
+        private void OnDestroy()
+        {
+            if (InputManager.Instance != null)
+            {
+                InputManager.Instance.OnBindingsChanged -= OnBindingsChanged;
+            }
+        }
+
+        private void OnBindingsChanged()
+        {
+            UpdateProcessedMessage();
         }
 
         private void SetupComponents()
@@ -91,15 +125,18 @@ namespace UltimateController
             textObj.transform.localPosition = new Vector3(0f, 0f, -0.1f);
 
             _textMesh = textObj.AddComponent<TextMeshPro>();
-            _textMesh.text = _message;
             _textMesh.fontSize = _fontSize;
             _textMesh.color = _textColour;
             _textMesh.alignment = TextAlignmentOptions.Center;
             _textMesh.sortingOrder = 100;
+            _textMesh.enableWordWrapping = false;
             
-            // Set rect transform size for proper text wrapping
+            // Set rect transform to auto-size (no fixed size = no yellow box)
             RectTransform rt = _textMesh.GetComponent<RectTransform>();
-            rt.sizeDelta = new Vector2(20f, 10f);
+            rt.sizeDelta = Vector2.zero;
+
+            // Process and set initial message
+            UpdateProcessedMessage();
 
             // Size background to fit text
             Invoke(nameof(UpdateBackgroundSize), 0.1f);
@@ -129,43 +166,82 @@ namespace UltimateController
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            // Get the root player object (might be this collider's object or parent)
-            UltimatePlayerController controller = other.GetComponent<UltimatePlayerController>();
-            
-            // If no controller on this object, check if it's a child of player
-            if (controller == null)
-            {
-                controller = other.GetComponentInParent<UltimatePlayerController>();
-            }
-            
-            // No player found at all
+            // Check if it's the player (not clones or effects)
+            var controller = other.GetComponent<UltimatePlayerController>();
             if (controller == null) return;
-            
-            // IMPORTANT: Only trigger if collider is on the SAME object as the controller
-            // This ignores DashSprite and other child colliders
             if (other.gameObject != controller.gameObject) return;
 
             _playerInZone = true;
             _targetAlpha = 1f;
+            
+            // Update message in case bindings changed
+            UpdateProcessedMessage();
         }
 
         private void OnTriggerExit2D(Collider2D other)
         {
-            // Same check as enter
-            UltimatePlayerController controller = other.GetComponent<UltimatePlayerController>();
-            
-            if (controller == null)
-            {
-                controller = other.GetComponentInParent<UltimatePlayerController>();
-            }
-            
+            var controller = other.GetComponent<UltimatePlayerController>();
             if (controller == null) return;
-            
-            // Only trigger if collider is on the SAME object as the controller
             if (other.gameObject != controller.gameObject) return;
 
             _playerInZone = false;
             _targetAlpha = 0f;
+        }
+
+        private void UpdateProcessedMessage()
+        {
+            _processedMessage = ProcessPlaceholders(_message);
+            
+            if (_textMesh != null)
+            {
+                _textMesh.text = _processedMessage;
+                UpdateBackgroundSize();
+            }
+        }
+
+        private string ProcessPlaceholders(string text)
+        {
+            if (InputManager.Instance == null)
+            {
+                return text;
+            }
+
+            string result = text;
+
+            // Replace placeholders with actual button names (uppercase)
+            result = result.Replace("{JUMP}", GetButtonName(InputManager.GameAction.Jump));
+            result = result.Replace("{DASH}", GetButtonName(InputManager.GameAction.Dash));
+            result = result.Replace("{CLONE}", GetButtonName(InputManager.GameAction.Clone));
+            result = result.Replace("{PAUSE}", GetButtonName(InputManager.GameAction.Pause));
+            
+            // Also support lowercase
+            result = result.Replace("{jump}", GetButtonName(InputManager.GameAction.Jump));
+            result = result.Replace("{dash}", GetButtonName(InputManager.GameAction.Dash));
+            result = result.Replace("{clone}", GetButtonName(InputManager.GameAction.Clone));
+            result = result.Replace("{pause}", GetButtonName(InputManager.GameAction.Pause));
+
+            return result;
+        }
+
+        private string GetButtonName(InputManager.GameAction action)
+        {
+            if (InputManager.Instance == null) return "???";
+            
+            var binding = InputManager.Instance.GetBinding(action);
+            if (binding == null) return "???";
+            
+            if (binding.JoystickButton != KeyCode.None)
+            {
+                return InputManager.GetJoystickButtonName(binding.JoystickButton);
+            }
+            
+            // Fallback to keyboard if no joystick button
+            if (binding.KeyboardKey != KeyCode.None)
+            {
+                return binding.KeyboardKey.ToString();
+            }
+            
+            return "???";
         }
 
         private void SetAlpha(float alpha)
