@@ -28,8 +28,14 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
-        // Options button (JoystickButton9) or Escape to toggle pause
-        bool pausePressed = Input.GetKeyDown(KeyCode.JoystickButton9) || Input.GetKeyDown(KeyCode.Escape);
+        // Get pause/start button from ControllerDatabase, fallback to JoystickButton9 (Options on PS)
+        KeyCode pauseButton = KeyCode.JoystickButton9;
+        if (ControllerDatabase.Instance != null)
+        {
+            pauseButton = ControllerDatabase.Instance.GetStartButton();
+        }
+
+        bool pausePressed = Input.GetKeyDown(pauseButton) || Input.GetKeyDown(KeyCode.Escape);
         
         if (pausePressed)
         {

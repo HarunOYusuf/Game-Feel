@@ -226,26 +226,30 @@ public class InputManager : MonoBehaviour
     {
         if (key == KeyCode.None) return "NOT SET";
         
+        // Use ControllerDatabase if available for controller-specific names
+        if (ControllerDatabase.Instance != null)
+        {
+            return ControllerDatabase.Instance.GetButtonName(key);
+        }
+        
+        // Fallback to generic names if no ControllerDatabase
         int buttonNum = (int)key - (int)KeyCode.JoystickButton0;
         
-        // PS5 Controller Names
         switch (buttonNum)
         {
-            case 0: return "SQUARE";
-            case 1: return "X";
-            case 2: return "CIRCLE";
-            case 3: return "TRIANGLE";
+            case 0: return "BUTTON 1";
+            case 1: return "BUTTON 2";
+            case 2: return "BUTTON 3";
+            case 3: return "BUTTON 4";
             case 4: return "L1";
             case 5: return "R1";
             case 6: return "L2";
             case 7: return "R2";
-            case 8: return "SHARE";
-            case 9: return "OPTIONS";
+            case 8: return "SELECT";
+            case 9: return "START";
             case 10: return "L3";
             case 11: return "R3";
-            case 12: return "PS BUTTON";
-            case 13: return "TOUCHPAD";
-            default: return $"BUTTON {buttonNum}";
+            default: return $"BUTTON {buttonNum + 1}";
         }
     }
 

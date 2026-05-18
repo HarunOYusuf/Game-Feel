@@ -113,7 +113,32 @@ public class UINavigator : MonoBehaviour
 
     private void HandleNavigation()
     {
+        // Check if InputRebindUI is waiting for input - if so, don't navigate
+        var rebindUI = GetComponentInChildren<InputRebindUI>();
+        if (rebindUI == null)
+        {
+            rebindUI = GetComponent<InputRebindUI>();
+        }
+        
+        if (rebindUI != null && rebindUI.IsRebinding)
+        {
+            return;
+        }
+
+        // Get input from left stick (Vertical axis)
         float vertical = Input.GetAxisRaw("Vertical");
+        
+        // PS5/PS4 D-pad is on Axis 8 (7th axis, 0-indexed)
+        // We need to read it directly using GetAxis with joystick axis
+        float dpadVertical = Input.GetAxisRaw("DPadY");
+        if (Mathf.Abs(dpadVertical) > Mathf.Abs(vertical))
+        {
+            vertical = dpadVertical;
+        }
+        
+        // Fallback: Some controllers map D-pad to button indices
+        if (Input.GetKey(KeyCode.JoystickButton11)) vertical = 1f;  // Up on some
+        if (Input.GetKey(KeyCode.JoystickButton12)) vertical = -1f; // Down on some
         
         bool canInput = _inputWasZero || (Time.unscaledTime - _lastInputTime > _inputRepeatDelay);
         
@@ -154,8 +179,14 @@ public class UINavigator : MonoBehaviour
             return;
         }
 
-        // X button (JoystickButton1) or Enter/Space
-        bool confirmPressed = Input.GetKeyDown(KeyCode.JoystickButton1) || 
+        // Get confirm button from ControllerDatabase, fallback to JoystickButton1 (X on PS)
+        KeyCode confirmButton = KeyCode.JoystickButton1;
+        if (ControllerDatabase.Instance != null)
+        {
+            confirmButton = ControllerDatabase.Instance.GetConfirmButton();
+        }
+
+        bool confirmPressed = Input.GetKeyDown(confirmButton) || 
                               Input.GetKeyDown(KeyCode.Return) || 
                               Input.GetKeyDown(KeyCode.Space);
 
@@ -171,8 +202,14 @@ public class UINavigator : MonoBehaviour
 
     private void HandleBack()
     {
-        // Circle button (JoystickButton2) or Escape
-        bool backPressed = Input.GetKeyDown(KeyCode.JoystickButton2) || 
+        // Get back button from ControllerDatabase, fallback to JoystickButton2 (Circle on PS)
+        KeyCode backButton = KeyCode.JoystickButton2;
+        if (ControllerDatabase.Instance != null)
+        {
+            backButton = ControllerDatabase.Instance.GetBackButton();
+        }
+
+        bool backPressed = Input.GetKeyDown(backButton) || 
                            Input.GetKeyDown(KeyCode.Escape);
 
         if (!backPressed) return;
