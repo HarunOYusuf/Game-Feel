@@ -4,6 +4,9 @@ using UnityEngine.SceneManagement;
 /// <summary>
 /// Pause menu with PS5 controller support.
 /// Options button (JoystickButton9) to pause/unpause.
+/// 
+/// Timer pausing is automatic: PauseGame() sets Time.timeScale = 0,
+/// which freezes Time.time, which is what GameManager uses for its timer.
 /// </summary>
 public class PauseMenu : MonoBehaviour
 {
@@ -11,12 +14,14 @@ public class PauseMenu : MonoBehaviour
     [SerializeField] private GameObject pauseMenu;
     [SerializeField] private GameObject pauseButton;
     [SerializeField] private GameObject controlsPanel;
+    [SerializeField] private GameObject leaderboardPanel;
 
     [Header("Player")]
     [SerializeField] private MonoBehaviour playerMovementScript;
 
     private bool isPaused = false;
     private bool inControlsMenu = false;
+    private bool inLeaderboardMenu = false;
 
     private void Start()
     {
@@ -24,6 +29,8 @@ public class PauseMenu : MonoBehaviour
         
         if (controlsPanel != null)
             controlsPanel.SetActive(false);
+        if (leaderboardPanel != null)
+            leaderboardPanel.SetActive(false);
     }
 
     private void Update()
@@ -42,6 +49,10 @@ public class PauseMenu : MonoBehaviour
             if (inControlsMenu)
             {
                 CloseControlsMenu();
+            }
+            else if (inLeaderboardMenu)
+            {
+                CloseLeaderboardMenu();
             }
             else if (isPaused)
             {
@@ -64,7 +75,11 @@ public class PauseMenu : MonoBehaviour
             pauseButton.SetActive(false);
         if (controlsPanel != null)
             controlsPanel.SetActive(false);
+        if (leaderboardPanel != null)
+            leaderboardPanel.SetActive(false);
 
+        // Sets Time.timeScale = 0, which automatically pauses GameManager's timer
+        // because the timer uses Time.time (which is timescale-dependent)
         Time.timeScale = 0f;
 
         if (playerMovementScript != null)
@@ -84,6 +99,7 @@ public class PauseMenu : MonoBehaviour
     {
         isPaused = false;
         inControlsMenu = false;
+        inLeaderboardMenu = false;
         
         if (pauseMenu != null)
             pauseMenu.SetActive(false);
@@ -91,6 +107,8 @@ public class PauseMenu : MonoBehaviour
             pauseButton.SetActive(true);
         if (controlsPanel != null)
             controlsPanel.SetActive(false);
+        if (leaderboardPanel != null)
+            leaderboardPanel.SetActive(false);
 
         Time.timeScale = 1f;
 
@@ -124,6 +142,57 @@ public class PauseMenu : MonoBehaviour
         
         if (controlsPanel != null)
             controlsPanel.SetActive(false);
+        if (pauseMenu != null)
+        {
+            pauseMenu.SetActive(true);
+            
+            var navigator = pauseMenu.GetComponent<UINavigator>();
+            if (navigator != null)
+            {
+                navigator.RefreshSelectables();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Open the leaderboard panel from the pause menu.
+    /// Wire this to your "Leaderboard" button's OnClick.
+    /// </summary>
+    public void OpenLeaderboardMenu()
+    {
+        inLeaderboardMenu = true;
+        
+        if (pauseMenu != null)
+            pauseMenu.SetActive(false);
+        if (leaderboardPanel != null)
+        {
+            leaderboardPanel.SetActive(true);
+
+            // Refresh the leaderboard contents
+            var leaderboardUI = leaderboardPanel.GetComponentInChildren<UltimateController.LeaderboardUI>();
+            if (leaderboardUI != null)
+            {
+                leaderboardUI.SetHighlightedPlacement(-1);
+                leaderboardUI.Refresh();
+            }
+            
+            var navigator = leaderboardPanel.GetComponent<UINavigator>();
+            if (navigator != null)
+            {
+                navigator.RefreshSelectables();
+            }
+        }
+    }
+
+    /// <summary>
+    /// Close the leaderboard panel and return to the pause menu.
+    /// </summary>
+    public void CloseLeaderboardMenu()
+    {
+        inLeaderboardMenu = false;
+        
+        if (leaderboardPanel != null)
+            leaderboardPanel.SetActive(false);
         if (pauseMenu != null)
         {
             pauseMenu.SetActive(true);

@@ -4954,11 +4954,11 @@ GameObject:
   - component: {fileID: 7853955967205434623}
   - component: {fileID: 6146770160892067226}
   - component: {fileID: 7588394745082905626}
-  - component: {fileID: 8383998173185445655}
   - component: {fileID: 4384922247409495985}
+  - component: {fileID: 4306400340684875898}
   m_Layer: 3
   m_Name: Time Clone
-  m_TagString: Untagged
+  m_TagString: Clone
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5045,38 +5045,6 @@ CapsuleCollider2D:
   m_Offset: {x: 0.04676962, y: -0.08275175}
   m_Size: {x: 0.6664171, y: 1.4873972}
   m_Direction: 0
---- !u!114 &8383998173185445655
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3782571018942737372}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 74f7fcb1a9f76e549b41b906f91b775e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _interpolatePosition: 1
-  _playbackSpeed: 1
-  _checkGroundDuringPlayback: 1
-  _groundCheckDistance: 0.2
-  _groundLayer:
-    serializedVersion: 2
-    m_Bits: 64
-  _enableGravityAfterPlayback: 1
-  _gravityScale: 3
-  _speedParam: Speed
-  _groundedParam: IsGrounded
-  _verticalVelocityParam: VerticalVelocity
-  _dashingParam: IsDashing
-  _wallSlidingParam: IsWallSliding
-  _jumpTrigger: Jump
-  _flipSprite: 1
-  _ghostAlpha: 0.5
-  _spawnParticles: {fileID: 0}
-  _despawnParticles: {fileID: 0}
-  _fallCheckWidth: 0.3
 --- !u!114 &4384922247409495985
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5118,6 +5086,27 @@ MonoBehaviour:
   _verticalVelocityParam: VerticalVelocity
   _wallSlidingParam: IsWallSliding
   _dashingParam: IsDashing
+--- !u!114 &4306400340684875898
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3782571018942737372}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f36c76f02e650740a1a6225680883ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _maxRecordTime: 5
+  _snapshotsPerSecond: 60
+  _clonePrefab: {fileID: 0}
+  _cloneDuration: 5
+  _maxClones: 3
+  _destroyOnComplete: 1
+  _spawnKey: 0
+  _spawnJoystickButton: 332
+  _spawnCooldown: 0.5
 --- !u!1 &5626296837889164131
 GameObject:
   m_ObjectHideFlags: 0

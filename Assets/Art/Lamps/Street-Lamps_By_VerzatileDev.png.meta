@@ -1,0 +1,1040 @@
+fileFormatVersion: 2
+guid: 421cf909b64390d4aaf6fcdfdff012e5
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: -1400453170927564948
+    second: Street-Lamps_By_VerzatileDev_0
+  - first:
+      213: -3715659969544633295
+    second: Street-Lamps_By_VerzatileDev_1
+  - first:
+      213: 4265190652782919338
+    second: Street-Lamps_By_VerzatileDev_2
+  - first:
+      213: -4651044726994530311
+    second: Street-Lamps_By_VerzatileDev_3
+  - first:
+      213: 6734321586938574518
+    second: Street-Lamps_By_VerzatileDev_4
+  - first:
+      213: -4819030367327878334
+    second: Street-Lamps_By_VerzatileDev_5
+  - first:
+      213: 867848457866542673
+    second: Street-Lamps_By_VerzatileDev_6
+  - first:
+      213: 6527554806374823070
+    second: Street-Lamps_By_VerzatileDev_7
+  - first:
+      213: 6296228623573264827
+    second: Street-Lamps_By_VerzatileDev_8
+  - first:
+      213: 2582241333771076449
+    second: Street-Lamps_By_VerzatileDev_9
+  - first:
+      213: 4402710767043929384
+    second: Street-Lamps_By_VerzatileDev_10
+  - first:
+      213: -8549148945108777251
+    second: Street-Lamps_By_VerzatileDev_11
+  - first:
+      213: -7848867121325908613
+    second: Street-Lamps_By_VerzatileDev_12
+  - first:
+      213: 5995609381417859807
+    second: Street-Lamps_By_VerzatileDev_13
+  - first:
+      213: -1167441972734489867
+    second: Street-Lamps_By_VerzatileDev_14
+  - first:
+      213: -7715226764961864160
+    second: Street-Lamps_By_VerzatileDev_15
+  - first:
+      213: 2959843223879386905
+    second: Street-Lamps_By_VerzatileDev_16
+  - first:
+      213: -900299435672421178
+    second: Street-Lamps_By_VerzatileDev_17
+  - first:
+      213: 1836816911063919926
+    second: Street-Lamps_By_VerzatileDev_18
+  - first:
+      213: 107548672928215762
+    second: Street-Lamps_By_VerzatileDev_19
+  - first:
+      213: -3939277219333699259
+    second: Street-Lamps_By_VerzatileDev_20
+  - first:
+      213: 4861453763377020768
+    second: Street-Lamps_By_VerzatileDev_21
+  - first:
+      213: -2195120075251122551
+    second: Street-Lamps_By_VerzatileDev_22
+  - first:
+      213: -1396660787516126291
+    second: Street-Lamps_By_VerzatileDev_23
+  - first:
+      213: 6871851776921839132
+    second: Street-Lamps_By_VerzatileDev_24
+  - first:
+      213: 4136518428577085910
+    second: Street-Lamps_By_VerzatileDev_25
+  - first:
+      213: -3496274086666451290
+    second: Street-Lamps_By_VerzatileDev_26
+  - first:
+      213: -6544433126835867785
+    second: Street-Lamps_By_VerzatileDev_27
+  - first:
+      213: 7749368679804060565
+    second: Street-Lamps_By_VerzatileDev_28
+  - first:
+      213: -893163586606128016
+    second: Street-Lamps_By_VerzatileDev_29
+  - first:
+      213: -568307957279034037
+    second: Street-Lamps_By_VerzatileDev_30
+  - first:
+      213: -5851262804765783134
+    second: Street-Lamps_By_VerzatileDev_31
+  - first:
+      213: -5887790735908703540
+    second: Street-Lamps_By_VerzatileDev_32
+  - first:
+      213: -4598192418672356649
+    second: Street-Lamps_By_VerzatileDev_33
+  - first:
+      213: -120201335774282606
+    second: Street-Lamps_By_VerzatileDev_34
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 100
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_0
+      rect:
+        serializedVersion: 2
+        x: 497
+        y: 2843
+        width: 99
+        height: 719
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c670b4ec247909ce0800000000000000
+      internalID: -1400453170927564948
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_1
+      rect:
+        serializedVersion: 2
+        x: 715
+        y: 2843
+        width: 98
+        height: 719
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1344721b1f25f6cc0800000000000000
+      internalID: -3715659969544633295
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_2
+      rect:
+        serializedVersion: 2
+        x: 939
+        y: 2843
+        width: 153
+        height: 634
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: aae317efc40013b30800000000000000
+      internalID: 4265190652782919338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_3
+      rect:
+        serializedVersion: 2
+        x: 1183
+        y: 2843
+        width: 153
+        height: 635
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9ff890d867b247fb0800000000000000
+      internalID: -4651044726994530311
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_4
+      rect:
+        serializedVersion: 2
+        x: 1464
+        y: 2843
+        width: 99
+        height: 719
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6b6f7b8adcd157d50800000000000000
+      internalID: 6734321586938574518
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_5
+      rect:
+        serializedVersion: 2
+        x: 1666
+        y: 2843
+        width: 230
+        height: 677
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2430a99c96d5f1db0800000000000000
+      internalID: -4819030367327878334
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_6
+      rect:
+        serializedVersion: 2
+        x: 1999
+        y: 2843
+        width: 229
+        height: 677
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15e710a03973b0c00800000000000000
+      internalID: 867848457866542673
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_7
+      rect:
+        serializedVersion: 2
+        x: 2356
+        y: 2843
+        width: 287
+        height: 665
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e947ddd0388869a50800000000000000
+      internalID: 6527554806374823070
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_8
+      rect:
+        serializedVersion: 2
+        x: 2773
+        y: 2843
+        width: 287
+        height: 665
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bb92bb40392b06750800000000000000
+      internalID: 6296228623573264827
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_9
+      rect:
+        serializedVersion: 2
+        x: 3192
+        y: 2843
+        width: 284
+        height: 693
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 16381cfcfc6f5d320800000000000000
+      internalID: 2582241333771076449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_10
+      rect:
+        serializedVersion: 2
+        x: 3620
+        y: 2843
+        width: 285
+        height: 693
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 825e076bd12991d30800000000000000
+      internalID: 4402710767043929384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_11
+      rect:
+        serializedVersion: 2
+        x: 507
+        y: 1945
+        width: 252
+        height: 685
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dd6c2ea64525b5980800000000000000
+      internalID: -8549148945108777251
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_12
+      rect:
+        serializedVersion: 2
+        x: 903
+        y: 1946
+        width: 250
+        height: 683
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b7d502030f8331390800000000000000
+      internalID: -7848867121325908613
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_13
+      rect:
+        serializedVersion: 2
+        x: 1309
+        y: 1946
+        width: 433
+        height: 683
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fda396f57fea43350800000000000000
+      internalID: 5995609381417859807
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_14
+      rect:
+        serializedVersion: 2
+        x: 1873
+        y: 1946
+        width: 433
+        height: 683
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5fa874f06b96ccfe0800000000000000
+      internalID: -1167441972734489867
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_15
+      rect:
+        serializedVersion: 2
+        x: 2474
+        y: 1945
+        width: 75
+        height: 685
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 026acd062220ee490800000000000000
+      internalID: -7715226764961864160
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_16
+      rect:
+        serializedVersion: 2
+        x: 2859
+        y: 1945
+        width: 75
+        height: 685
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9178d2eeab9731920800000000000000
+      internalID: 2959843223879386905
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_17
+      rect:
+        serializedVersion: 2
+        x: 3108
+        y: 1936
+        width: 337
+        height: 703
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ccb249ee6e7183f0800000000000000
+      internalID: -900299435672421178
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_18
+      rect:
+        serializedVersion: 2
+        x: 3571
+        y: 1936
+        width: 338
+        height: 703
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 63d256daf3fad7910800000000000000
+      internalID: 1836816911063919926
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_19
+      rect:
+        serializedVersion: 2
+        x: 464
+        y: 1038
+        width: 343
+        height: 723
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2d273fdb2f61e7100800000000000000
+      internalID: 107548672928215762
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_20
+      rect:
+        serializedVersion: 2
+        x: 915
+        y: 1038
+        width: 344
+        height: 723
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 54983dd7d30e459c0800000000000000
+      internalID: -3939277219333699259
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_21
+      rect:
+        serializedVersion: 2
+        x: 1391
+        y: 1038
+        width: 384
+        height: 723
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 06fb212d07a577340800000000000000
+      internalID: 4861453763377020768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_22
+      rect:
+        serializedVersion: 2
+        x: 1872
+        y: 1038
+        width: 385
+        height: 723
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 98ef35bfbed5981e0800000000000000
+      internalID: -2195120075251122551
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_23
+      rect:
+        serializedVersion: 2
+        x: 2416
+        y: 1046
+        width: 202
+        height: 702
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: dab4260e9601e9ce0800000000000000
+      internalID: -1396660787516126291
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_24
+      rect:
+        serializedVersion: 2
+        x: 2796
+        y: 1046
+        width: 201
+        height: 702
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c16209058c8bd5f50800000000000000
+      internalID: 6871851776921839132
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_25
+      rect:
+        serializedVersion: 2
+        x: 3195
+        y: 1046
+        width: 219
+        height: 627
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6d9b136389dd76930800000000000000
+      internalID: 4136518428577085910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_26
+      rect:
+        serializedVersion: 2
+        x: 3633
+        y: 1046
+        width: 219
+        height: 627
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6a6c7d20e3dba7fc0800000000000000
+      internalID: -3496274086666451290
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_27
+      rect:
+        serializedVersion: 2
+        x: 340
+        y: 93
+        width: 344
+        height: 723
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 77f26aabeb08d25a0800000000000000
+      internalID: -6544433126835867785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_28
+      rect:
+        serializedVersion: 2
+        x: 789
+        y: 93
+        width: 344
+        height: 723
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5934241a1c94b8b60800000000000000
+      internalID: 7749368679804060565
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_29
+      rect:
+        serializedVersion: 2
+        x: 1305
+        y: 101
+        width: 172
+        height: 687
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 074270e3378da93f0800000000000000
+      internalID: -893163586606128016
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_30
+      rect:
+        serializedVersion: 2
+        x: 1707
+        y: 101
+        width: 172
+        height: 687
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b45fa538ce6fc18f0800000000000000
+      internalID: -568307957279034037
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_31
+      rect:
+        serializedVersion: 2
+        x: 2026
+        y: 96
+        width: 417
+        height: 724
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2abca7afa732ccea0800000000000000
+      internalID: -5851262804765783134
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_32
+      rect:
+        serializedVersion: 2
+        x: 2548
+        y: 96
+        width: 417
+        height: 724
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: cc27352458d5a4ea0800000000000000
+      internalID: -5887790735908703540
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_33
+      rect:
+        serializedVersion: 2
+        x: 3038
+        y: 115
+        width: 376
+        height: 627
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7d2d3248b50ff20c0800000000000000
+      internalID: -4598192418672356649
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Street-Lamps_By_VerzatileDev_34
+      rect:
+        serializedVersion: 2
+        x: 3491
+        y: 115
+        width: 375
+        height: 627
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 29c75af9585f45ef0800000000000000
+      internalID: -120201335774282606
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      Street-Lamps_By_VerzatileDev_0: -1400453170927564948
+      Street-Lamps_By_VerzatileDev_1: -3715659969544633295
+      Street-Lamps_By_VerzatileDev_10: 4402710767043929384
+      Street-Lamps_By_VerzatileDev_11: -8549148945108777251
+      Street-Lamps_By_VerzatileDev_12: -7848867121325908613
+      Street-Lamps_By_VerzatileDev_13: 5995609381417859807
+      Street-Lamps_By_VerzatileDev_14: -1167441972734489867
+      Street-Lamps_By_VerzatileDev_15: -7715226764961864160
+      Street-Lamps_By_VerzatileDev_16: 2959843223879386905
+      Street-Lamps_By_VerzatileDev_17: -900299435672421178
+      Street-Lamps_By_VerzatileDev_18: 1836816911063919926
+      Street-Lamps_By_VerzatileDev_19: 107548672928215762
+      Street-Lamps_By_VerzatileDev_2: 4265190652782919338
+      Street-Lamps_By_VerzatileDev_20: -3939277219333699259
+      Street-Lamps_By_VerzatileDev_21: 4861453763377020768
+      Street-Lamps_By_VerzatileDev_22: -2195120075251122551
+      Street-Lamps_By_VerzatileDev_23: -1396660787516126291
+      Street-Lamps_By_VerzatileDev_24: 6871851776921839132
+      Street-Lamps_By_VerzatileDev_25: 4136518428577085910
+      Street-Lamps_By_VerzatileDev_26: -3496274086666451290
+      Street-Lamps_By_VerzatileDev_27: -6544433126835867785
+      Street-Lamps_By_VerzatileDev_28: 7749368679804060565
+      Street-Lamps_By_VerzatileDev_29: -893163586606128016
+      Street-Lamps_By_VerzatileDev_3: -4651044726994530311
+      Street-Lamps_By_VerzatileDev_30: -568307957279034037
+      Street-Lamps_By_VerzatileDev_31: -5851262804765783134
+      Street-Lamps_By_VerzatileDev_32: -5887790735908703540
+      Street-Lamps_By_VerzatileDev_33: -4598192418672356649
+      Street-Lamps_By_VerzatileDev_34: -120201335774282606
+      Street-Lamps_By_VerzatileDev_4: 6734321586938574518
+      Street-Lamps_By_VerzatileDev_5: -4819030367327878334
+      Street-Lamps_By_VerzatileDev_6: 867848457866542673
+      Street-Lamps_By_VerzatileDev_7: 6527554806374823070
+      Street-Lamps_By_VerzatileDev_8: 6296228623573264827
+      Street-Lamps_By_VerzatileDev_9: 2582241333771076449
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

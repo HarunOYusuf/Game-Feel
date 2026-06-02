@@ -135,26 +135,16 @@ namespace UltimateController
 
         private bool ShouldDetect(Collider2D other)
         {
-            // Check for player (must be main collider, not DashSprite)
-            if (_detectPlayer)
+            // Check for player by tag
+            if (_detectPlayer && other.CompareTag("Player"))
             {
-                var controller = other.GetComponent<UltimatePlayerController>();
-                if (controller != null && other.gameObject == controller.gameObject)
-                {
-                    // Make sure it's not a clone
-                    if (other.GetComponent<TimeClone>() == null)
-                        return true;
-                }
+                return true;
             }
 
-            // Check for clone
-            if (_detectClones)
+            // Check for clone by tag
+            if (_detectClones && other.CompareTag("Clone"))
             {
-                var clone = other.GetComponent<TimeClone>();
-                if (clone != null)
-                {
-                    return true;
-                }
+                return true;
             }
 
             return false;
@@ -166,6 +156,7 @@ namespace UltimateController
             _objectsOnPlate.RemoveWhere(obj => obj == null);
 
             bool somethingOnPlate = _objectsOnPlate.Count > 0;
+            bool wasPressed = _isPressed;
             
             // Handle press state change
             if (somethingOnPlate != _isPressed)
@@ -187,7 +178,7 @@ namespace UltimateController
             }
 
             // Handle activation based on mode
-            bool shouldBeActivated = false;
+            bool shouldBeActivated = _isActivated;
             
             switch (_activationMode)
             {
@@ -197,16 +188,13 @@ namespace UltimateController
                     break;
 
                 case ActivationMode.ToggleOnStep:
-                    // Toggle when stepped on
-                    if (somethingOnPlate && !_isPressed)
+                    // Toggle when just stepped on (transition from not pressed to pressed)
+                    if (somethingOnPlate && !wasPressed)
                     {
                         // Just stepped on - toggle
                         shouldBeActivated = !_isActivated;
-                    }
-                    else
-                    {
-                        // Keep current state
-                        shouldBeActivated = _isActivated;
+                        if (_showDebugMessages)
+                            Debug.Log($"PressurePlate: TOGGLED to {shouldBeActivated}");
                     }
                     break;
 

@@ -177,18 +177,16 @@ namespace UltimateController
 
         private bool IsValidActivator(Collider2D other)
         {
-            // Check for player
-            var player = other.GetComponent<UltimatePlayerController>();
-            if (player != null) return true;
-
-            // Check for clone
-            if (_cloneCanActivate)
+            // Check for player by tag
+            if (other.CompareTag("Player"))
             {
-                var clone = other.GetComponent<CloneMovement>();
-                if (clone != null) return true;
+                return true;
+            }
 
-                var oldClone = other.GetComponent<TimeClone>();
-                if (oldClone != null) return true;
+            // Check for clone by tag
+            if (_cloneCanActivate && other.CompareTag("Clone"))
+            {
+                return true;
             }
 
             return false;

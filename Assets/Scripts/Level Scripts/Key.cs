@@ -68,13 +68,13 @@ namespace UltimateController
 
         private void OnTriggerEnter2D(Collider2D other)
         {
-            // Check if it's a clone
-            var clone = other.GetComponent<TimeClone>();
-            bool isClone = clone != null;
+            // Simple tag-based detection
+            bool isClone = other.CompareTag("Clone");
+            bool isPlayer = other.CompareTag("Player");
 
-            // Check if it's the player
-            var player = other.GetComponent<UltimatePlayerController>();
-            bool isPlayer = player != null;
+            // Ignore if neither player nor clone
+            if (!isClone && !isPlayer)
+                return;
 
             // Determine if collection is allowed
             if (_cloneOnly)
@@ -82,7 +82,7 @@ namespace UltimateController
                 // Clone-only key: only clones can collect
                 if (!isClone)
                 {
-                    if (isPlayer && _showDebugMessages)
+                    if (_showDebugMessages)
                         Debug.Log($"Key {_keyID}: Only clones can collect this key!");
                     return;
                 }
@@ -94,59 +94,33 @@ namespace UltimateController
                     return;
             }
 
-            // Find the player's inventory (clones give keys to the player)
+            // Find the player's inventory
             PlayerInventory inventory = null;
             
             if (isClone)
             {
-                // Clone collected - find the REAL player (not another clone)
-                UltimatePlayerController playerController = null;
-                
-                // Find all UltimatePlayerControllers and pick the one that's NOT a clone
-                var allControllers = FindObjectsByType<UltimatePlayerController>(FindObjectsSortMode.None);
-                foreach (var controller in allControllers)
+                // Clone collected - find the player by tag
+                var playerObj = GameObject.FindGameObjectWithTag("Player");
+                if (playerObj != null)
                 {
-                    // Skip if this object also has TimeClone component (it's a clone, not the player)
-                    if (controller.GetComponent<TimeClone>() != null)
-                        continue;
-                    
-                    playerController = controller;
-                    break;
-                }
-                
-                // Fallback: Find by tag (player should be tagged, clones aren't)
-                if (playerController == null)
-                {
-                    var playerObj = GameObject.FindGameObjectWithTag("Player");
-                    if (playerObj != null && playerObj.GetComponent<TimeClone>() == null)
-                        playerController = playerObj.GetComponent<UltimatePlayerController>();
-                }
-                
-                if (playerController != null)
-                {
-                    inventory = playerController.GetComponent<PlayerInventory>();
+                    inventory = playerObj.GetComponent<PlayerInventory>();
                     if (inventory == null)
                     {
-                        inventory = playerController.gameObject.AddComponent<PlayerInventory>();
-                        if (_showDebugMessages)
-                            Debug.Log($"Key: Added PlayerInventory to {playerController.gameObject.name}");
+                        inventory = playerObj.AddComponent<PlayerInventory>();
                     }
-                    
-                    if (_showDebugMessages)
-                        Debug.Log($"Key: Found REAL player '{playerController.gameObject.name}' for clone key transfer");
                 }
                 else
                 {
-                    Debug.LogError("Key: Clone collected key but could not find the real player!");
+                    Debug.LogError("Key: Clone collected key but could not find Player!");
                     return;
                 }
             }
             else
             {
                 // Player collected directly
-                inventory = player.GetComponent<PlayerInventory>();
+                inventory = other.GetComponent<PlayerInventory>();
                 if (inventory == null)
-                    inventory = player.gameObject.AddComponent<PlayerInventory>();
+                    inventory = other.gameObject.AddComponent<PlayerInventory>();
             }
 
             if (inventory == null)

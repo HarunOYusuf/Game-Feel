@@ -5,6 +5,7 @@ namespace UltimateController
     /// <summary>
     /// Smooth camera that looks ahead of the player.
     /// Shows more of what's in front of the player rather than behind.
+    /// Also supports manual peeking with the right analog stick.
     /// </summary>
     public class PlayerCamera : MonoBehaviour
     {
@@ -23,6 +24,28 @@ namespace UltimateController
         [Tooltip("How fast the look-ahead adjusts when changing direction")]
         [SerializeField] private float _lookAheadSmoothing = 5f;
 
+        [Header("Right Stick Look (Manual)")]
+        [Tooltip("Allow the player to peek around using the right analog stick")]
+        [SerializeField] private bool _useRightStickLook = true;
+
+        [Tooltip("How far the camera can peek with the right stick (horizontal)")]
+        [SerializeField] private float _rightStickLookDistanceX = 3f;
+
+        [Tooltip("How far the camera can peek with the right stick (vertical)")]
+        [SerializeField] private float _rightStickLookDistanceY = 2f;
+
+        [Tooltip("How fast the right-stick peek moves")]
+        [SerializeField] private float _rightStickSmoothing = 6f;
+
+        [Tooltip("Horizontal axis name for the right stick (set up in Input Manager)")]
+        [SerializeField] private string _rightStickHorizontalAxis = "RightStickX";
+
+        [Tooltip("Vertical axis name for the right stick (set up in Input Manager)")]
+        [SerializeField] private string _rightStickVerticalAxis = "RightStickY";
+
+        [Tooltip("Dead zone for the right stick")]
+        [SerializeField] private float _rightStickDeadZone = 0.2f;
+
         [Header("Smoothing")]
         [Tooltip("How smoothly the camera follows horizontally")]
         [SerializeField] private float _horizontalSmoothing = 8f;
@@ -39,6 +62,9 @@ namespace UltimateController
         private Vector3 _currentLookAhead;
         private Vector3 _targetLookAhead;
         private float _lastFacingDirection = 1f;
+
+        // Right-stick peek state
+        private Vector3 _currentStickLook;
 
         private void Start()
         {
@@ -82,8 +108,16 @@ namespace UltimateController
                 _lookAheadSmoothing * Time.deltaTime
             );
 
-            // Calculate target position
-            Vector3 targetPosition = _target.position + _baseOffset + _currentLookAhead;
+            // Calculate right-stick peek
+            Vector3 targetStickLook = GetRightStickLook();
+            _currentStickLook = Vector3.Lerp(
+                _currentStickLook,
+                targetStickLook,
+                _rightStickSmoothing * Time.deltaTime
+            );
+
+            // Calculate target position (base + auto look-ahead + manual peek)
+            Vector3 targetPosition = _target.position + _baseOffset + _currentLookAhead + _currentStickLook;
 
             // Apply dead zone
             Vector3 currentPos = transform.position;
@@ -100,6 +134,31 @@ namespace UltimateController
 
             // Apply position (keep Z from base offset)
             transform.position = new Vector3(newX, newY, _baseOffset.z);
+        }
+
+        /// <summary>
+        /// Read the right analog stick and convert to a camera peek offset.
+        /// </summary>
+        private Vector3 GetRightStickLook()
+        {
+            if (!_useRightStickLook) return Vector3.zero;
+
+            float stickX = 0f;
+            float stickY = 0f;
+
+            // Read axes safely (they may not be set up in Input Manager)
+            try { stickX = Input.GetAxis(_rightStickHorizontalAxis); } catch { stickX = 0f; }
+            try { stickY = Input.GetAxis(_rightStickVerticalAxis); } catch { stickY = 0f; }
+
+            // Apply dead zone
+            if (Mathf.Abs(stickX) < _rightStickDeadZone) stickX = 0f;
+            if (Mathf.Abs(stickY) < _rightStickDeadZone) stickY = 0f;
+
+            return new Vector3(
+                stickX * _rightStickLookDistanceX,
+                stickY * _rightStickLookDistanceY,
+                0f
+            );
         }
 
         private float GetFacingDirection()
@@ -134,6 +193,7 @@ namespace UltimateController
             if (_target == null) return;
             
             _currentLookAhead = _targetLookAhead;
+            _currentStickLook = Vector3.zero;
             transform.position = _target.position + _baseOffset + _currentLookAhead;
         }
 

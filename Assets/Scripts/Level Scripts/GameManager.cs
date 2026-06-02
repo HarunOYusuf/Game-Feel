@@ -6,7 +6,7 @@ using TMPro;
 namespace UltimateController
 {
     /// <summary>
-    /// Manages level state, checkpoints, player spawning, and ability unlocks.
+    /// Manages level state, checkpoints, player spawning, ability unlocks, and the level timer.
     /// Place ONE in each level scene.
     /// 
     /// Setup:
@@ -16,6 +16,7 @@ namespace UltimateController
     /// 4. Configure which abilities are available in this level
     /// 5. Optionally assign unlock trigger zones
     /// 6. Assign level end trigger for completion
+    /// 7. Place a TimerStartTrigger at the end of the tutorial to start the timer
     /// </summary>
     public class GameManager : MonoBehaviour
     {
@@ -51,8 +52,12 @@ namespace UltimateController
         [Tooltip("When player enters this trigger, level is complete")]
         [SerializeField] private Collider2D _levelEndTrigger;
         
-        [Tooltip("UI Panel to show on completion (optional - will create one if not assigned)")]
+        [Tooltip("UI Panel to show on completion (LevelEndUI script should be on this panel)")]
         [SerializeField] private GameObject _completionPanel;
+
+        [Header("Timer Settings")]
+        [Tooltip("Start the timer immediately at scene load (skip the trigger zone). Useful for testing.")]
+        [SerializeField] private bool _startTimerAtSceneLoad = false;
 
         [Header("Debug")]
         [SerializeField] private bool _showDebugMessages = true;
@@ -75,18 +80,48 @@ namespace UltimateController
 
         // Stats
         private int _deathCount;
-        private float _levelStartTime;
         
         // Level complete state
         private bool _levelComplete;
 
+        // Timer state
+        // Uses Time.time accumulation, which is naturally pause-aware because
+        // PauseMenu sets Time.timeScale = 0 (Time.time freezes during pause).
+        private bool _timerRunning;
+        private bool _timerEverStarted;
+        private float _timerStartTime;
+        private float _frozenTime; // The time captured when timer stops (so it doesn't tick after level end)
+
         // Public accessors
         public string LevelName => _levelName;
         public int DeathCount => _deathCount;
-        public float LevelTime => Time.time - _levelStartTime;
         public bool DashEnabled => _dashEnabled;
         public bool TimeCloneEnabled => _timeCloneEnabled;
         public bool LevelComplete => _levelComplete;
+
+        /// <summary>
+        /// Current level time in seconds. Pause-aware (frozen when Time.timeScale = 0).
+        /// Returns 0 before the timer has started, and the frozen final time after level complete.
+        /// </summary>
+        public float LevelTime
+        {
+            get
+            {
+                if (!_timerEverStarted) return 0f;
+                if (!_timerRunning) return _frozenTime;
+                return Time.time - _timerStartTime;
+            }
+        }
+
+        /// <summary>
+        /// True if the timer is currently counting up.
+        /// </summary>
+        public bool IsTimerRunning => _timerRunning;
+
+        /// <summary>
+        /// True if the timer has been started at any point (used by UI to know whether to show).
+        /// </summary>
+        public bool HasTimerEverStarted => _timerEverStarted;
 
         private void Awake()
         {
@@ -124,9 +159,7 @@ namespace UltimateController
 
         private void Start()
         {
-            _levelStartTime = Time.time;
-
-            // Set initial checkpoint to spawn point (this is the default respawn before any checkpoint)
+            // Set initial checkpoint to spawn point
             if (_spawnPoint != null)
             {
                 _currentCheckpoint = _spawnPoint.position;
@@ -134,7 +167,6 @@ namespace UltimateController
             }
             else
             {
-                // Fallback: use player's current position as spawn
                 if (_player != null)
                 {
                     _currentCheckpoint = _player.transform.position;
@@ -161,13 +193,18 @@ namespace UltimateController
                 _completionPanel.SetActive(false);
             }
 
+            // Optionally start the timer immediately (for testing or levels without a tutorial zone)
+            if (_startTimerAtSceneLoad)
+            {
+                StartTimer();
+            }
+
             if (_showDebugMessages)
                 Debug.Log($"GameManager: {_levelName} started. Dash: {_dashEnabled}, Clone: {_timeCloneEnabled}");
         }
 
         private void SetupUnlockTriggers()
         {
-            // Setup dash unlock trigger
             if (_dashUnlockTrigger != null)
             {
                 _dashUnlockTrigger.isTrigger = true;
@@ -175,7 +212,6 @@ namespace UltimateController
                 dashTrigger.Initialize(this, AbilityUnlockTrigger.AbilityType.Dash);
             }
 
-            // Setup time clone unlock trigger
             if (_timeCloneUnlockTrigger != null)
             {
                 _timeCloneUnlockTrigger.isTrigger = true;
@@ -194,37 +230,58 @@ namespace UltimateController
             }
         }
 
+        #region Timer
+
         /// <summary>
-        /// Unlock dash ability (persists through death)
+        /// Start the level timer. Called by TimerStartTrigger when the player crosses
+        /// the trigger zone at the end of the tutorial. Safe to call multiple times — only
+        /// the first call has an effect.
         /// </summary>
+        public void StartTimer()
+        {
+            if (_timerEverStarted) return;
+
+            _timerRunning = true;
+            _timerEverStarted = true;
+            _timerStartTime = Time.time;
+            _frozenTime = 0f;
+
+            if (_showDebugMessages)
+                Debug.Log("GameManager: Timer STARTED");
+        }
+
+        /// <summary>
+        /// Stop the timer and freeze the final time. Called automatically when the level completes.
+        /// </summary>
+        public void StopTimer()
+        {
+            if (!_timerRunning) return;
+
+            _frozenTime = Time.time - _timerStartTime;
+            _timerRunning = false;
+
+            if (_showDebugMessages)
+                Debug.Log($"GameManager: Timer STOPPED at {LeaderboardEntry.FormatTime(_frozenTime)}");
+        }
+
+        #endregion
+
         public void UnlockDash()
         {
             if (_dashEnabled) return;
-            
             _dashEnabled = true;
             ApplyAbilitySettings();
-
-            if (_showDebugMessages)
-                Debug.Log("GameManager: DASH UNLOCKED!");
+            if (_showDebugMessages) Debug.Log("GameManager: DASH UNLOCKED!");
         }
 
-        /// <summary>
-        /// Unlock time clone ability (persists through death)
-        /// </summary>
         public void UnlockTimeClone()
         {
             if (_timeCloneEnabled) return;
-            
             _timeCloneEnabled = true;
             ApplyAbilitySettings();
-
-            if (_showDebugMessages)
-                Debug.Log("GameManager: TIME CLONE UNLOCKED!");
+            if (_showDebugMessages) Debug.Log("GameManager: TIME CLONE UNLOCKED!");
         }
 
-        /// <summary>
-        /// Apply current ability settings to player
-        /// </summary>
         private void ApplyAbilitySettings()
         {
             if (_playerController != null)
@@ -245,17 +302,12 @@ namespace UltimateController
             }
         }
 
-        /// <summary>
-        /// Spawn or respawn player at current checkpoint
-        /// </summary>
         public void SpawnPlayer()
         {
             if (_player == null) return;
 
-            // Always use _currentCheckpoint - it's set to spawn point at Start
             Vector2 spawnPos = _currentCheckpoint;
 
-            // Teleport player
             if (_playerController != null)
             {
                 _playerController.Teleport(spawnPos);
@@ -265,19 +317,14 @@ namespace UltimateController
                 _player.transform.position = spawnPos;
             }
 
-            // Ensure player is active
             _player.SetActive(true);
 
-            // Re-apply ability settings (uses current unlocked state, not initial)
             ApplyAbilitySettings();
 
             if (_showDebugMessages)
                 Debug.Log($"GameManager: Player spawned at {spawnPos}. Dash: {_dashEnabled}, Clone: {_timeCloneEnabled}");
         }
 
-        /// <summary>
-        /// Called when player dies - respawn at checkpoint
-        /// </summary>
         public void OnPlayerDeath()
         {
             _deathCount++;
@@ -285,78 +332,57 @@ namespace UltimateController
             if (_showDebugMessages)
                 Debug.Log($"GameManager: Player died. Deaths: {_deathCount}");
 
-            // Destroy any active clones
-            if (_cloneRecorder != null)
-            {
-                _cloneRecorder.DestroyAllClones();
-            }
-            
-            if (_inputCloneRecorder != null)
-            {
-                _inputCloneRecorder.DestroyAllClones();
-            }
+            if (_cloneRecorder != null) _cloneRecorder.DestroyAllClones();
+            if (_inputCloneRecorder != null) _inputCloneRecorder.DestroyAllClones();
 
-            // Respawn player
             SpawnPlayer();
         }
 
-        /// <summary>
-        /// Set a new checkpoint position
-        /// </summary>
         public void SetCheckpoint(Vector2 position)
         {
             _currentCheckpoint = position;
             _hasCheckpoint = true;
-
-            if (_showDebugMessages)
-                Debug.Log($"GameManager: Checkpoint set at {position}");
+            if (_showDebugMessages) Debug.Log($"GameManager: Checkpoint set at {position}");
         }
 
         /// <summary>
-        /// Called when player reaches the level end
+        /// Called when player reaches the level end. Stops the timer and shows the completion panel.
         /// </summary>
         public void CompleteLevel()
         {
             if (_levelComplete) return;
             
             _levelComplete = true;
+
+            // Stop the timer and capture the final time
+            StopTimer();
+
             float completionTime = LevelTime;
 
             if (_showDebugMessages)
-                Debug.Log($"GameManager: {_levelName} complete! Time: {completionTime:F2}s, Deaths: {_deathCount}");
+                Debug.Log($"GameManager: {_levelName} complete! Time: {LeaderboardEntry.FormatTime(completionTime)}, Deaths: {_deathCount}");
 
-            // Disable player movement
             if (_playerController != null)
             {
                 _playerController.SetMovementEnabled(false);
             }
 
-            // Show completion panel
             ShowCompletionPanel();
         }
 
-        /// <summary>
-        /// Show the completion UI panel
-        /// </summary>
         private void ShowCompletionPanel()
         {
-            // If panel is assigned, use it
             if (_completionPanel != null)
             {
                 _completionPanel.SetActive(true);
                 return;
             }
 
-            // Otherwise create one dynamically
             CreateCompletionPanel();
         }
 
-        /// <summary>
-        /// Creates a completion panel dynamically if none is assigned
-        /// </summary>
         private void CreateCompletionPanel()
         {
-            // Find or create Canvas
             Canvas canvas = FindFirstObjectByType<Canvas>();
             if (canvas == null)
             {
@@ -367,7 +393,6 @@ namespace UltimateController
                 canvasObj.AddComponent<GraphicRaycaster>();
             }
 
-            // Create panel
             var panel = new GameObject("CompletionPanel");
             panel.transform.SetParent(canvas.transform, false);
 
@@ -380,7 +405,6 @@ namespace UltimateController
             var panelImage = panel.AddComponent<Image>();
             panelImage.color = new Color(0f, 0f, 0f, 0.8f);
 
-            // Create text
             var textObj = new GameObject("CompletionText");
             textObj.transform.SetParent(panel.transform, false);
 
@@ -390,11 +414,10 @@ namespace UltimateController
             textRect.sizeDelta = new Vector2(800, 200);
             textRect.anchoredPosition = Vector2.zero;
 
-            // Try TextMeshPro first, fall back to legacy Text
             var tmp = textObj.AddComponent<TextMeshProUGUI>();
             if (tmp != null)
             {
-                tmp.text = "Congratulations!\nYou have completed the playtest";
+                tmp.text = $"Level Complete!\nTime: {LeaderboardEntry.FormatTime(LevelTime)}";
                 tmp.fontSize = 48;
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.color = Color.white;
@@ -403,29 +426,22 @@ namespace UltimateController
             _completionPanel = panel;
             
             if (_showDebugMessages)
-                Debug.Log("GameManager: Created completion panel");
+                Debug.Log("GameManager: Created fallback completion panel (no LevelEndUI assigned)");
         }
 
-        /// <summary>
-        /// Restart the current level
-        /// </summary>
         public void RestartLevel()
         {
+            Time.timeScale = 1f;
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
-        /// <summary>
-        /// Get current checkpoint position
-        /// </summary>
         public Vector2 GetCheckpoint()
         {
             return _hasCheckpoint ? _currentCheckpoint : (Vector2)_spawnPoint.position;
         }
 
-        // Visualise spawn and checkpoint in editor
         private void OnDrawGizmos()
         {
-            // Draw spawn point
             if (_spawnPoint != null)
             {
                 Gizmos.color = Color.green;
@@ -434,28 +450,25 @@ namespace UltimateController
                 Gizmos.DrawLine(_spawnPoint.position + Vector3.up * 0.3f, _spawnPoint.position + Vector3.down * 0.3f);
             }
 
-            // Draw current checkpoint (play mode only)
             if (Application.isPlaying && _hasCheckpoint)
             {
                 Gizmos.color = Color.yellow;
                 Gizmos.DrawWireSphere(_currentCheckpoint, 0.4f);
             }
 
-            // Draw unlock triggers
-            Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f); // Orange
+            Gizmos.color = new Color(1f, 0.5f, 0f, 0.5f);
             if (_dashUnlockTrigger != null)
             {
                 Gizmos.DrawWireCube(_dashUnlockTrigger.bounds.center, _dashUnlockTrigger.bounds.size);
             }
             
-            Gizmos.color = new Color(0.5f, 0f, 1f, 0.5f); // Purple
+            Gizmos.color = new Color(0.5f, 0f, 1f, 0.5f);
             if (_timeCloneUnlockTrigger != null)
             {
                 Gizmos.DrawWireCube(_timeCloneUnlockTrigger.bounds.center, _timeCloneUnlockTrigger.bounds.size);
             }
             
-            // Draw level end trigger
-            Gizmos.color = new Color(0f, 1f, 0.5f, 0.5f); // Cyan/Green
+            Gizmos.color = new Color(0f, 1f, 0.5f, 0.5f);
             if (_levelEndTrigger != null)
             {
                 Gizmos.DrawWireCube(_levelEndTrigger.bounds.center, _levelEndTrigger.bounds.size);
@@ -463,9 +476,6 @@ namespace UltimateController
         }
     }
 
-    /// <summary>
-    /// Helper component added to unlock trigger colliders
-    /// </summary>
     public class AbilityUnlockTrigger : MonoBehaviour
     {
         public enum AbilityType { Dash, TimeClone }
@@ -483,8 +493,6 @@ namespace UltimateController
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (_hasTriggered) return;
-
-            // Only trigger for real player (not clones, not DashSprite)
             if (!other.TryGetComponent<UltimatePlayerController>(out _)) return;
             if (other.GetComponent<TimeClone>() != null) return;
             if (other.GetComponent<CloneMovement>() != null) return;
@@ -493,34 +501,22 @@ namespace UltimateController
 
             switch (_abilityType)
             {
-                case AbilityType.Dash:
-                    _gameManager.UnlockDash();
-                    break;
-                case AbilityType.TimeClone:
-                    _gameManager.UnlockTimeClone();
-                    break;
+                case AbilityType.Dash: _gameManager.UnlockDash(); break;
+                case AbilityType.TimeClone: _gameManager.UnlockTimeClone(); break;
             }
         }
     }
 
-    /// <summary>
-    /// Helper component added to level end trigger collider
-    /// </summary>
     public class LevelEndTrigger : MonoBehaviour
     {
         private GameManager _gameManager;
         private bool _hasTriggered;
 
-        public void Initialize(GameManager manager)
-        {
-            _gameManager = manager;
-        }
+        public void Initialize(GameManager manager) { _gameManager = manager; }
 
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (_hasTriggered) return;
-
-            // Only trigger for real player (not clones)
             if (!other.TryGetComponent<UltimatePlayerController>(out _)) return;
             if (other.GetComponent<TimeClone>() != null) return;
             if (other.GetComponent<CloneMovement>() != null) return;
